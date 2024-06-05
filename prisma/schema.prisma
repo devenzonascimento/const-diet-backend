@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tabela de usuários
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  name          String
+  age           Int?
+  height        Int?
+  weight        Float?
+  sex           String?
+  activityLevel String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  plans         Plan[]
+  routines      Routine[]
+  meals         Meal[]
+  foods         Food[]
+}
+
+// Tabela de planos alimentares
+model Plan {
+  id            String         @id @default(uuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  startDate     DateTime
+  endDate       DateTime
+  goal          String
+  dailyRoutines DailyRoutine[]
+}
+
+// Tabela para representar as rotinas
+model Routine {
+  id           String         @id @default(uuid())
+  name         String
+  meals        DailyMeal[]
+  DailyRoutine DailyRoutine[]
+  User         User           @relation(fields: [userId], references: [id])
+  userId       String
+}
+
+// Tabela para armazenar as rotinas diárias associadas às datas
+model DailyRoutine {
+  @@id([planId, routineId])
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  routineId String
+  routine   Routine  @relation(fields: [routineId], references: [id])
+  date      DateTime
+  status    Status   @default(PENDING)
+}
+
+// Tabela para armazenar as refeições diárias associadas às rotinas diárias
+model DailyMeal {
+  @@id([routineId, mealId])
+  routineId     String
+  routine       Routine  @relation(fields: [routineId], references: [id])
+  mealId        String
+  meal          Meal     @relation(fields: [mealId], references: [id])
+  scheduledTime DateTime
+  status        Status   @default(PENDING)
+}
+
+// Tabela para representar as refeições
+model Meal {
+  id          String       @id @default(uuid())
+  name        String
+  foods       FoodInMeal[]
+  DailyMeal   DailyMeal[]
+  User        User         @relation(fields: [userId], references: [id])
+  userId      String
+}
+
+model FoodInMeal {
+  @@id([mealId, foodId])
+  quantity Float
+  unit     Unit   @default(GRAMS)
+  foodId   String
+  food     Food   @relation(fields: [foodId], references: [id])
+  mealId   String
+  meal     Meal   @relation(fields: [mealId], references: [id])
+}
+
+// Tabela para representar os alimentos
+model Food {
+  id            String       @id @default(uuid())
+  name          String
+  carbohydrates Float
+  proteins      Float
+  fats          Float
+  sodiums       Float
+  fibers        Float
+  calories      Float
+  meals         FoodInMeal[]
+  User          User         @relation(fields: [userId], references: [id])
+  userId        String
+}
+
+enum Status {
+  PENDING
+  COMPLETED
+  MISSED
+}
+
+enum Unit {
+  GRAMS
+  MILILITERS
+  UNITS
+}
