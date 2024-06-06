@@ -1,6 +1,6 @@
-import { FoodRepository, FoodCreate, FoodUpdate } from "../interfaces/food-interface.js";
 import { FoodRepositoryPrisma } from "../repositories/food-repository.js";
 
+import { FoodRepository, FoodCreate, FoodUpdate } from "../interfaces/food-interface.js";
 
 export class FoodUseCase {
   private foodRepository: FoodRepository;

@@ -1,8 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { FoodCreate, FoodUpdate } from "../interfaces/food-interface.js";
+
+import { authMiddleware } from "../middlewares/auth-middleware.js";
 
 import { FoodUseCase } from "../usecases/food-usecase.js";
-import { authMiddleware } from "../middlewares/auth-middleware.js";
+
+import { FoodCreate, FoodUpdate } from "../interfaces/food-interface.js";
 
 interface RequestParams {
   userId: string;
