@@ -1,15 +1,14 @@
 import { prisma } from "../database/prisma-client.js";
 
 import {
-  User,
-  UserCreate,
   UserRepository,
-  UserStats,
+  UserCreate,
   UserUpdate,
+  UserStats,
 } from "../interfaces/user-interface.js";
 
 export class UserRepositoryPrisma implements UserRepository {
-  async create(data: UserCreate): Promise<User> {
+  async create(data: UserCreate) {
     return await prisma.user.create({
       data: {
         name: data.name,
@@ -19,7 +18,7 @@ export class UserRepositoryPrisma implements UserRepository {
     });
   }
 
-  async addStats(userId: string, data: UserStats): Promise<User> {
+  async addStats(userId: string, data: UserStats) {
     return await prisma.user.update({
       where: {
         id: userId,
@@ -34,7 +33,7 @@ export class UserRepositoryPrisma implements UserRepository {
     });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string) {
     return await prisma.user.findFirst({
       where: {
         email: email,
@@ -42,7 +41,7 @@ export class UserRepositoryPrisma implements UserRepository {
     });
   }
 
-  async update(userId: string, data: UserUpdate): Promise<User> {
+  async update(userId: string, data: UserUpdate) {
     return await prisma.user.update({
       where: {
         id: userId,

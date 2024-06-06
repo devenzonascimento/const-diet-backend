@@ -4,12 +4,10 @@ import jwt from "jsonwebtoken";
 import { compareSync, hashSync } from "bcrypt";
 
 import {
-  User,
   UserCreate,
-  UserLogin,
-  UserRepository,
-  UserStats,
   UserUpdate,
+  UserLogin,
+  UserStats,
 } from "../interfaces/user-interface.js";
 
 interface DecodedToken extends jwt.JwtPayload {
@@ -17,13 +15,13 @@ interface DecodedToken extends jwt.JwtPayload {
 }
 
 export class UserUseCase {
-  private userRepository: UserRepository;
+  private userRepository;
 
   constructor() {
     this.userRepository = new UserRepositoryPrisma();
   }
 
-  async create({ name, email, password }: UserCreate): Promise<User> {
+  async create({ name, email, password }: UserCreate) {
     const userExists = await this.userRepository.findByEmail(email);
 
     if (userExists) {
@@ -94,6 +92,6 @@ export class UserUseCase {
   }
 
   async delete(userId: string) {
-    this.userRepository.delete(userId);
+    await this.userRepository.delete(userId);
   }
 }

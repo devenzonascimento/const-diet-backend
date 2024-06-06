@@ -4,10 +4,14 @@ import { UserUseCase } from "../usecases/user-usecase.js";
 
 import {
   UserCreate,
+  UserUpdate,
   UserLogin,
   UserStats,
-  UserUpdate,
 } from "../interfaces/user-interface.js";
+
+interface RequestParams {
+  userId: string;
+}
 
 export const userRoutes = async (server: FastifyInstance) => {
   const userUseCase = new UserUseCase();
@@ -48,7 +52,7 @@ export const userRoutes = async (server: FastifyInstance) => {
     }
   });
 
-  server.patch<{ Params: { userId: string }; Body: UserStats }>(
+  server.patch<{ Params: RequestParams; Body: UserStats }>(
     "/:userId/details",
     async (req, reply) => {
       try {
@@ -78,7 +82,7 @@ export const userRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.put<{ Params: { userId: string }; Body: UserUpdate }>(
+  server.put<{ Params: RequestParams; Body: UserUpdate }>(
     "/:userId",
     async (req, reply) => {
       try {
@@ -95,7 +99,7 @@ export const userRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.delete<{ Params: { userId: string } }>(
+  server.delete<{ Params: RequestParams }>(
     "/:userId",
     async (req, reply) => {
       try {
