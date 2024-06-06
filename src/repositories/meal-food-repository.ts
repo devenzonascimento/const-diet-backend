@@ -3,7 +3,6 @@ import { prisma } from "../database/prisma-client.js";
 import {
   MealFoodRepository,
   MealFoodCreate,
-  MealFood,
   MealFoodUpdate,
 } from "../interfaces/meal-food-interface.js";
 
