@@ -12,6 +12,7 @@ export class FoodRepositoryPrisma implements FoodRepository {
       data: {
         userId: data.userId,
         name: data.name,
+        unit: data.unit,
         calories: data.calories,
         carbohydrates: data.carbohydrates,
         proteins: data.proteins,
@@ -30,6 +31,7 @@ export class FoodRepositoryPrisma implements FoodRepository {
       select: {
         id: true,
         name: true,
+        unit: true,
         calories: true,
         carbohydrates: true,
         proteins: true,
@@ -60,6 +62,7 @@ export class FoodRepositoryPrisma implements FoodRepository {
       },
       data: {
         name: data.name,
+        unit: data.unit,
         calories: data.calories,
         carbohydrates: data.carbohydrates,
         proteins: data.proteins,

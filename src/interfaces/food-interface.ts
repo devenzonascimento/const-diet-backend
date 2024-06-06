@@ -1,6 +1,9 @@
+import { $Enums } from "@prisma/client";
+
 export interface Food {
   id: string;
   name: string;
+  unit: $Enums.Unit
   calories: number;
   carbohydrates: number;
   proteins: number;
@@ -12,6 +15,7 @@ export interface Food {
 export interface FoodCreate {
   userId: string;
   name: string;
+  unit: $Enums.Unit
   calories: number;
   carbohydrates: number;
   proteins: number;
@@ -22,6 +26,7 @@ export interface FoodCreate {
 
 export interface FoodUpdate {
   name: string;
+  unit: $Enums.Unit
   calories: number;
   carbohydrates: number;
   proteins: number;
