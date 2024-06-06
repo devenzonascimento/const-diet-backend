@@ -45,6 +45,18 @@ export const foodRoutes = async (server: FastifyInstance) => {
     }
   });
 
+  server.get<{ Params: RequestParams }>("/", async (req, reply) => {
+    try {
+      const { userId } = req.params;
+
+      const foods = await foodUseCase.getAll(userId);
+
+      reply.code(200).send(foods);
+    } catch (error) {
+      reply.code(500).send(error);
+    }
+  });
+
   server.put<{ Params: RequestParams; Body: FoodUpdate }>(
     "/:foodId",
     async (req, reply) => {
@@ -69,18 +81,6 @@ export const foodRoutes = async (server: FastifyInstance) => {
       await foodUseCase.delete(foodId);
 
       reply.code(204).send();
-    } catch (error) {
-      reply.code(500).send(error);
-    }
-  });
-
-  server.get<{ Params: RequestParams }>("/", async (req, reply) => {
-    try {
-      const { userId } = req.params;
-
-      const foods = await foodUseCase.getAllFoods(userId);
-
-      reply.code(200).send(foods);
     } catch (error) {
       reply.code(500).send(error);
     }

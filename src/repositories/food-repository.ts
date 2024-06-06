@@ -2,13 +2,12 @@ import { prisma } from "../database/prisma-client.js";
 
 import {
   FoodRepository,
-  Food,
   FoodCreate,
   FoodUpdate,
 } from "../interfaces/food-interface.js";
 
 export class FoodRepositoryPrisma implements FoodRepository {
-  async create(data: FoodCreate): Promise<Food> {
+  async create(data: FoodCreate) {
     return await prisma.food.create({
       data: {
         userId: data.userId,
@@ -23,7 +22,7 @@ export class FoodRepositoryPrisma implements FoodRepository {
     });
   }
 
-  async findById(foodId: string): Promise<Food | null> {
+  async findById(foodId: string) {
     return await prisma.food.findFirst({
       where: {
         id: foodId,
@@ -37,24 +36,24 @@ export class FoodRepositoryPrisma implements FoodRepository {
         fats: true,
         sodiums: true,
         fibers: true,
-      }
+      },
     });
   }
 
-  async findByName(userId: string, foodName: string): Promise<Food | null> {
+  async findByName(userId: string, foodName: string) {
     return await prisma.food.findFirst({
       where: {
         userId,
         name: foodName,
-      }
-    })
+      },
+    });
   }
 
-  async getAllFoods(userId: string): Promise<Food[]> {
+  async getAll(userId: string) {
     return await prisma.food.findMany({ where: { userId } });
   }
 
-  async update(foodId: string, data: FoodUpdate): Promise<Food> {
+  async update(foodId: string, data: FoodUpdate) {
     return await prisma.food.update({
       where: {
         id: foodId,
@@ -71,8 +70,8 @@ export class FoodRepositoryPrisma implements FoodRepository {
     });
   }
 
-  async delete(foodId: string): Promise<Food> {
-    return await prisma.food.delete({
+  async delete(foodId: string) {
+    await prisma.food.delete({
       where: {
         id: foodId,
       },

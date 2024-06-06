@@ -1,17 +1,19 @@
 import { FoodRepositoryPrisma } from "../repositories/food-repository.js";
 
-import { FoodRepository, FoodCreate, FoodUpdate } from "../interfaces/food-interface.js";
+import { FoodCreate, FoodUpdate } from "../interfaces/food-interface.js";
 
 export class FoodUseCase {
-  private foodRepository: FoodRepository;
+  private foodRepository;
 
   constructor() {
     this.foodRepository = new FoodRepositoryPrisma();
   }
 
   async create(data: FoodCreate) {
-
-    const existsFood = await this.foodRepository.findByName(data.userId, data.name)
+    const existsFood = await this.foodRepository.findByName(
+      data.userId,
+      data.name
+    );
 
     if (existsFood) {
       throw new Error("This food name already exists");
@@ -24,9 +26,12 @@ export class FoodUseCase {
     return await this.foodRepository.findById(foodId);
   }
 
-  async update(userId: string, foodId: string, data: FoodUpdate) {
+  async getAll(userId: string) {
+    return await this.foodRepository.getAll(userId);
+  }
 
-    const existsFood = await this.foodRepository.findByName(userId, data.name)
+  async update(userId: string, foodId: string, data: FoodUpdate) {
+    const existsFood = await this.foodRepository.findByName(userId, data.name);
 
     if (existsFood) {
       throw new Error("This food name already exists");
@@ -36,10 +41,6 @@ export class FoodUseCase {
   }
 
   async delete(foodId: string) {
-    return await this.foodRepository.delete(foodId);
-  }
-
-  async getAllFoods(userId: string) {
-    return await this.foodRepository.getAllFoods(userId);
+    await this.foodRepository.delete(foodId);
   }
 }
