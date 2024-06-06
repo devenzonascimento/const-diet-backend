@@ -28,7 +28,6 @@ export class MealRepositoryPrisma implements MealRepository {
           select: {
             food: true,
             quantity: true,
-            unit: true,
           },
         },
       },
@@ -47,17 +46,16 @@ export class MealRepositoryPrisma implements MealRepository {
           select: {
             food: true,
             quantity: true,
-            unit: true,
           },
         },
       },
     });
   }
 
-  async update(mealId: string, data: MealUpdate) {
+  async update(data: MealUpdate) {
     return await prisma.meal.update({
       where: {
-        id: mealId,
+        id: data.id,
       },
       data: {
         name: data.name,
@@ -67,7 +65,7 @@ export class MealRepositoryPrisma implements MealRepository {
 
   async delete(mealId: string) {
     await prisma.$transaction([
-      prisma.foodInMeal.deleteMany({
+      prisma.mealFood.deleteMany({
         where: {
           mealId,
         },
