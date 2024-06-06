@@ -10,6 +10,7 @@ export interface MealCreate {
   name: string;
 }
 export interface MealUpdate {
+  id: string;
   name: string;
 }
 
@@ -23,6 +24,6 @@ export interface MealRepository {
   create: (data: MealCreate) => Promise<Meal>
   findById: (mealId: string) => Promise<MealWithFoods | null>
   getAll: (userId: string) => Promise<Meal[]>
-  update: (mealId: string, data: MealCreate) => Promise<Meal | null>
+  update: (data: MealUpdate) => Promise<Meal | null>
   delete: (mealId: string) => Promise<void>
 }
