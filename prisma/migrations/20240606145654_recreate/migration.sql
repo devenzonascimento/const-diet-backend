@@ -2,7 +2,7 @@
 CREATE TYPE "Status" AS ENUM ('PENDING', 'COMPLETED', 'MISSED');
 
 -- CreateEnum
-CREATE TYPE "Unit" AS ENUM ('GRAMS', 'MILILITERS', 'UNITS');
+CREATE TYPE "Unit" AS ENUM ('GRAMS', 'MILILITERS');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -71,25 +71,25 @@ CREATE TABLE "Meal" (
 );
 
 -- CreateTable
-CREATE TABLE "FoodInMeal" (
+CREATE TABLE "MealFood" (
     "quantity" DOUBLE PRECISION NOT NULL,
-    "unit" "Unit" NOT NULL DEFAULT 'GRAMS',
     "foodId" TEXT NOT NULL,
     "mealId" TEXT NOT NULL,
 
-    CONSTRAINT "FoodInMeal_pkey" PRIMARY KEY ("mealId","foodId")
+    CONSTRAINT "MealFood_pkey" PRIMARY KEY ("mealId","foodId")
 );
 
 -- CreateTable
 CREATE TABLE "Food" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "unit" "Unit" NOT NULL DEFAULT 'GRAMS',
+    "calories" DOUBLE PRECISION NOT NULL,
     "carbohydrates" DOUBLE PRECISION NOT NULL,
     "proteins" DOUBLE PRECISION NOT NULL,
     "fats" DOUBLE PRECISION NOT NULL,
     "sodiums" DOUBLE PRECISION NOT NULL,
     "fibers" DOUBLE PRECISION NOT NULL,
-    "calories" DOUBLE PRECISION NOT NULL,
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "Food_pkey" PRIMARY KEY ("id")
@@ -120,10 +120,10 @@ ALTER TABLE "DailyMeal" ADD CONSTRAINT "DailyMeal_mealId_fkey" FOREIGN KEY ("mea
 ALTER TABLE "Meal" ADD CONSTRAINT "Meal_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FoodInMeal" ADD CONSTRAINT "FoodInMeal_foodId_fkey" FOREIGN KEY ("foodId") REFERENCES "Food"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MealFood" ADD CONSTRAINT "MealFood_foodId_fkey" FOREIGN KEY ("foodId") REFERENCES "Food"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FoodInMeal" ADD CONSTRAINT "FoodInMeal_mealId_fkey" FOREIGN KEY ("mealId") REFERENCES "Meal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MealFood" ADD CONSTRAINT "MealFood_mealId_fkey" FOREIGN KEY ("mealId") REFERENCES "Meal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Food" ADD CONSTRAINT "Food_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
