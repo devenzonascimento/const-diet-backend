@@ -33,7 +33,7 @@ export class FoodUseCase {
   async update(userId: string, foodId: string, data: FoodUpdate) {
     const existsFood = await this.foodRepository.findByName(userId, data.name);
 
-    if (existsFood) {
+    if (existsFood && existsFood.id !== foodId) {
       throw new Error("This food name already exists");
     }
 
