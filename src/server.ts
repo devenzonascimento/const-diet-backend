@@ -1,10 +1,11 @@
 import { fastify, FastifyInstance } from "fastify";
 import { fastifyCors } from "@fastify/cors";
 
+import { authMiddleware } from "./middlewares/auth-middleware";
+
 import { userRoutes } from "./routes/user-route";
 import { foodRoutes } from "./routes/food-route";
 import { mealRoutes } from "./routes/meal-route";
-import { authMiddleware } from "./middlewares/auth-middleware";
 
 const server: FastifyInstance = fastify();
 
