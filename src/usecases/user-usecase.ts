@@ -8,6 +8,7 @@ import {
   UserUpdate,
   UserLogin,
   UserStats,
+  User,
 } from "../interfaces/user-interface.js";
 
 interface DecodedToken extends jwt.JwtPayload {
@@ -46,6 +47,12 @@ export class UserUseCase {
       throw new Error("Invalid password.");
     }
 
+    const token = this.createToken(user)
+
+    return { userId: user.id, token };
+  }
+
+  createToken(user: Pick<User, "id" | "email" | "password">) {
     const jwtKey = process.env.JWT_KEY;
     if (!jwtKey) {
       throw new Error("JWT key is not defined.");
@@ -58,10 +65,10 @@ export class UserUseCase {
         password: user.password,
       },
       jwtKey,
-      { expiresIn: 3600 }
+      { expiresIn: 15 * 60 }
     );
 
-    return { userId: user.id, token };
+    return token;
   }
 
   async verifyToken(token: string) {
@@ -75,8 +82,20 @@ export class UserUseCase {
 
       return await this.userRepository.findByEmail(decodedToken.email);
     } catch (error) {
-      throw new Error(`Error verifying token: ${error}`);
+      console.log(`Error verifying token: ${error}`);
     }
+  }
+
+  async refreshToken(token: string) {
+    const user = await this.verifyToken(token) as User
+
+    const newToken = this.createToken({
+      id: user.id,
+      email: user.email,
+      password:  user.password,
+    })
+
+    return newToken;
   }
 
   async findByEmail(email: string) {
