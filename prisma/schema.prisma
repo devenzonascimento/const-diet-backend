@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Tabela de usuários
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
@@ -20,79 +19,85 @@ model User {
   activityLevel String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  foods         Food[]
+  meals         Meal[]
   plans         Plan[]
   routines      Routine[]
-  meals         Meal[]
-  foods         Food[]
 }
 
-// Tabela de planos alimentares
 model Plan {
-  id            String         @id @default(uuid())
-  startDate     DateTime
-  endDate       DateTime
-  goal          String
-  userId        String
-  user          User           @relation(fields: [userId], references: [id])
-  dailyRoutines DailyRoutine[]
+  id        String         @id @default(uuid())
+  userId    String
+  startDate DateTime
+  endDate   DateTime
+  goal      String
+  routines  DailyRoutine[]
+  user      User           @relation(fields: [userId], references: [id])
 }
 
-// Tabela para armazenar as rotinas diárias associadas às datas
 model DailyRoutine {
   planId    String
-  plan      Plan     @relation(fields: [planId], references: [id])
   routineId String
-  routine   Routine  @relation(fields: [routineId], references: [id])
   date      DateTime
   status    Status   @default(PENDING)
+  plan      Plan     @relation(fields: [planId], references: [id])
+  routine   Routine  @relation(fields: [routineId], references: [id])
 
   @@id([planId, routineId])
 }
 
-// Tabela para representar as rotinas
 model Routine {
-  id           String         @id @default(uuid())
-  name         String
-  userId       String
-  User         User           @relation(fields: [userId], references: [id])
-  meals        DailyMeal[]
-  DailyRoutine DailyRoutine[]
+  id                 String         @id @default(uuid())
+  name               String
+  water              Int            @default(0)
+  totalCalories      Float          @default(0)
+  totalCarbohydrates Float          @default(0)
+  totalProteins      Float          @default(0)
+  totalFats          Float          @default(0)
+  totalSodiums       Float          @default(0)
+  totalFibers        Float          @default(0)
+  userId             String
+  meals              DailyMeal[]
+  plans              DailyRoutine[]
+  User               User           @relation(fields: [userId], references: [id])
 }
 
-// Tabela para armazenar as refeições diárias associadas às rotinas diárias
 model DailyMeal {
-  routineId     String
-  routine       Routine  @relation(fields: [routineId], references: [id])
-  mealId        String
-  meal          Meal     @relation(fields: [mealId], references: [id])
-  scheduledTime DateTime
-  status        Status   @default(PENDING)
+  routineId String
+  mealId    String
+  time      String
+  status    Status  @default(PENDING)
+  meal      Meal    @relation(fields: [mealId], references: [id])
+  routine   Routine @relation(fields: [routineId], references: [id])
 
   @@id([routineId, mealId])
 }
 
-// Tabela para representar as refeições
 model Meal {
-  id        String      @id @default(uuid())
-  name      String
-  foods     MealFood[]
-  DailyMeal DailyMeal[]
-  User      User        @relation(fields: [userId], references: [id])
-  userId    String
+  id                 String      @id @default(uuid())
+  name               String
+  totalCalories      Float          @default(0)
+  totalCarbohydrates Float          @default(0)
+  totalProteins      Float          @default(0)
+  totalFats          Float          @default(0)
+  totalSodiums       Float          @default(0)
+  totalFibers        Float          @default(0)
+  userId             String
+  routines           DailyMeal[]
+  User               User        @relation(fields: [userId], references: [id])
+  foods              MealFood[]
 }
 
-// Tabela para armazenar os alimentos associadas às refeições
 model MealFood {
-  mealId   String
-  meal     Meal   @relation(fields: [mealId], references: [id])
-  foodId   String
-  food     Food   @relation(fields: [foodId], references: [id])
   quantity Float
+  foodId   String
+  mealId   String
+  food     Food   @relation(fields: [foodId], references: [id])
+  meal     Meal   @relation(fields: [mealId], references: [id])
 
   @@id([mealId, foodId])
 }
 
-// Tabela para representar os alimentos
 model Food {
   id            String     @id @default(uuid())
   name          String
@@ -103,9 +108,9 @@ model Food {
   fats          Float
   sodiums       Float
   fibers        Float
-  meals         MealFood[]
-  User          User       @relation(fields: [userId], references: [id])
   userId        String
+  User          User       @relation(fields: [userId], references: [id])
+  meals         MealFood[]
 }
 
 enum Status {
