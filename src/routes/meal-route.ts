@@ -84,9 +84,9 @@ export const mealRoutes = async (server: FastifyInstance) => {
     try {
       const { userId } = req.params;
 
-      const meal = await mealUseCase.getAll(userId);
+      const meals = await mealUseCase.getAll(userId);
 
-      reply.code(200).send(meal);
+      reply.code(200).send(meals);
     } catch (error) {
       reply.code(500).send(error);
     }

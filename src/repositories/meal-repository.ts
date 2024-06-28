@@ -4,6 +4,7 @@ import {
   MealRepository,
   MealCreate,
   MealUpdate,
+  CalculatedFields,
 } from "../interfaces/meal-interface.js";
 
 export class MealRepositoryPrisma implements MealRepository {
@@ -42,6 +43,12 @@ export class MealRepositoryPrisma implements MealRepository {
       select: {
         id: true,
         name: true,
+        totalCalories: true,
+        totalCarbohydrates: true,
+        totalProteins: true,
+        totalFats: true,
+        totalSodiums: true,
+        totalFibers: true,
         foods: {
           select: {
             food: true,
@@ -76,5 +83,17 @@ export class MealRepositoryPrisma implements MealRepository {
         },
       }),
     ]);
+  }
+
+  async saveCalculatedFields(
+    mealId: string,
+    calculatedFields: CalculatedFields
+  ) {
+    await prisma.meal.update({
+      where: {
+        id: mealId,
+      },
+      data: calculatedFields,
+    });
   }
 }

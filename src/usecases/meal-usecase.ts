@@ -1,8 +1,10 @@
 import { MealRepositoryPrisma } from "../repositories/meal-repository.js";
 import { MealFoodRepositoryPrisma } from "../repositories/meal-food-repository.js";
 
-import { Meal, MealCreate } from "../interfaces/meal-interface.js";
+import { MealCreate, MealUpdate } from "../interfaces/meal-interface.js";
 import { MealFoodCreate } from "../interfaces/meal-food-interface.js";
+import { calculateTotalCalories } from "../functions/calculate-total-calories.js";
+import { calculateTotalNutrients } from "../functions/calculate-total-nutrients.js";
 
 export class MealUseCase {
   private mealRepository;
@@ -18,6 +20,20 @@ export class MealUseCase {
 
     await this.mealFoodRepository.createMany(meal.id, foodsData);
 
+    const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(meal.id);
+
+    const totalCalories = calculateTotalCalories(foodsToCalculate);
+    const totalNutrients = calculateTotalNutrients(foodsToCalculate);
+
+    await this.mealRepository.saveCalculatedFields(meal.id, {
+      totalCalories,
+      totalCarbohydrates: totalNutrients.carbohydrates,
+      totalProteins: totalNutrients.proteins,
+      totalFats: totalNutrients.fats,
+      totalSodiums: totalNutrients.sodiums,
+      totalFibers: totalNutrients.fibers,
+    });
+
     return meal;
   }
 
@@ -25,7 +41,11 @@ export class MealUseCase {
     return await this.mealRepository.findById(mealId);
   }
 
-  async update(meal: Meal, foods: MealFoodCreate[]) {
+  async getAll(userId: string) {
+    return await this.mealRepository.getAll(userId);
+  }
+
+  async update(meal: MealUpdate, foods: MealFoodCreate[]) {
     await this.mealRepository.update(meal);
 
     const currentFoods = await this.mealFoodRepository.findMany(meal.id);
@@ -51,14 +71,24 @@ export class MealUseCase {
       foodsToDelete,
     });
 
+    const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(meal.id);
+
+    const totalCalories = calculateTotalCalories(foodsToCalculate);
+    const totalNutrients = calculateTotalNutrients(foodsToCalculate);
+
+    await this.mealRepository.saveCalculatedFields(meal.id, {
+      totalCalories,
+      totalCarbohydrates: totalNutrients.carbohydrates,
+      totalProteins: totalNutrients.proteins,
+      totalFats: totalNutrients.fats,
+      totalSodiums: totalNutrients.sodiums,
+      totalFibers: totalNutrients.fibers,
+    });
+
     return;
   }
 
   async delete(mealId: string) {
     await this.mealRepository.delete(mealId);
-  }
-
-  async getAll(userId: string) {
-    return await this.mealRepository.getAll(userId);
   }
 }
