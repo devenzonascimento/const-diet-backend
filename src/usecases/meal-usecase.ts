@@ -20,19 +20,7 @@ export class MealUseCase {
 
     await this.mealFoodRepository.createMany(meal.id, foodsData);
 
-    const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(meal.id);
-
-    const totalCalories = calculateTotalCalories(foodsToCalculate);
-    const totalNutrients = calculateTotalNutrients(foodsToCalculate);
-
-    await this.mealRepository.saveCalculatedFields(meal.id, {
-      totalCalories,
-      totalCarbohydrates: totalNutrients.carbohydrates,
-      totalProteins: totalNutrients.proteins,
-      totalFats: totalNutrients.fats,
-      totalSodiums: totalNutrients.sodiums,
-      totalFibers: totalNutrients.fibers,
-    });
+    this.saveCalculatedFields(meal.id)
 
     return meal;
   }
@@ -71,12 +59,22 @@ export class MealUseCase {
       foodsToDelete,
     });
 
-    const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(meal.id);
+    this.saveCalculatedFields(meal.id)
+
+    return;
+  }
+
+  async delete(mealId: string) {
+    await this.mealRepository.delete(mealId);
+  }
+
+  async saveCalculatedFields(mealId: string) {
+    const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(mealId);
 
     const totalCalories = calculateTotalCalories(foodsToCalculate);
     const totalNutrients = calculateTotalNutrients(foodsToCalculate);
 
-    await this.mealRepository.saveCalculatedFields(meal.id, {
+    await this.mealRepository.saveCalculatedFields(mealId, {
       totalCalories,
       totalCarbohydrates: totalNutrients.carbohydrates,
       totalProteins: totalNutrients.proteins,
@@ -84,11 +82,5 @@ export class MealUseCase {
       totalSodiums: totalNutrients.sodiums,
       totalFibers: totalNutrients.fibers,
     });
-
-    return;
-  }
-
-  async delete(mealId: string) {
-    await this.mealRepository.delete(mealId);
   }
 }
