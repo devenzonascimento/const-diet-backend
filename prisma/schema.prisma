@@ -70,7 +70,7 @@ model DailyMeal {
   meal      Meal    @relation(fields: [mealId], references: [id])
   routine   Routine @relation(fields: [routineId], references: [id])
 
-  @@id([routineId, mealId])
+  @@id([routineId, mealId, time])
 }
 
 model Meal {
