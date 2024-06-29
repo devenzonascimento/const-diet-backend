@@ -1,4 +1,5 @@
 import { prisma } from "../database/prisma-client.js";
+import { DailyMealCreate } from "../interfaces/daily-meal-interface.js";
 
 import {
   RoutineRepository,
@@ -8,14 +9,28 @@ import {
 } from "../interfaces/routine-interface.js";
 
 export class RoutineRepositoryPrisma implements RoutineRepository {
-  async create(data: RoutineCreate) {
-    return await prisma.routine.create({
-      data: {
-        userId: data.userId,
-        name: data.name,
-        water: data.water,
-      },
-    });
+  async create(routineData: RoutineCreate, dailyMealsData: DailyMealCreate[]) {
+
+    const routineId = crypto.randomUUID()
+
+    return await prisma.$transaction([
+      prisma.routine.create({
+        data: {
+          id: routineId,
+          name: routineData.name,
+          water: routineData.water,
+          userId: routineData.userId,
+        },
+      }),
+      prisma.dailyMeal.createMany({
+        data: dailyMealsData.map((meal) => ({
+          routineId,
+          mealId: meal.mealId,
+          time: meal.time,
+          status: meal.status,          
+        })),
+      })
+    ])
   }
 
   async findById(routineId: string) {
@@ -129,11 +144,40 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
     routineId: string,
     calculatedFields: CalculatedFields
   ) {
-    await prisma.routine.update({
+    return await prisma.routine.update({
       where: {
         id: routineId,
       },
       data: calculatedFields,
+      select: {
+        id: true,
+        name: true,
+        water: true,
+        totalCalories: true,
+        totalCarbohydrates: true,
+        totalProteins: true,
+        totalFats: true,
+        totalSodiums: true,
+        totalFibers: true,
+        meals: {
+          select: {
+            status: true,
+            time: true,
+            meal: {
+              select: {
+                id: true,
+                name: true,
+                totalCalories: true,
+                totalCarbohydrates: true,
+                totalProteins: true,
+                totalFats: true,
+                totalSodiums: true,
+                totalFibers: true,
+              },
+            },
+          },
+        },
+      }
     });
   }
 }

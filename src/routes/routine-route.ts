@@ -59,9 +59,9 @@ export const routineRoutes = async (server: FastifyInstance) => {
 
         const { routineId } = req.params;
 
-        await routineUseCase.update({ id: routineId, name, water }, meals);
+        const routine = await routineUseCase.update({ id: routineId, name, water }, meals);
 
-        reply.code(200).send();
+        reply.code(200).send(routine);
       } catch (error) {
         console.log(error);
         reply.code(500).send(error);

@@ -17,11 +17,9 @@ export class RoutineUseCase {
   }
 
   async create(routineData: RoutineCreate, dailyMealsData: DailyMealCreate[]) {
-    const routine = await this.routineRepository.create(routineData);
+    const [{ id }] = await this.routineRepository.create(routineData, dailyMealsData);
 
-    await this.dailyMealRepository.createMany(routine.id, dailyMealsData);
-
-    this.saveCalculatedFields(routine.id)
+    const routine = this.saveCalculatedFields(id)
 
     return routine;
   }
@@ -34,36 +32,36 @@ export class RoutineUseCase {
     return await this.routineRepository.getAll(userId);
   }
 
-  async update(routine: RoutineUpdate, meals: DailyMealCreate[]) {
-    await this.routineRepository.update(routine);
+  async update(routineData: RoutineUpdate, dailyMealsData: DailyMealCreate[]) {
+    await this.routineRepository.update(routineData);
   
-    const currentMeals = await this.dailyMealRepository.findMany(routine.id);
+    const currentMeals = await this.dailyMealRepository.findMany(routineData.id);
   
     const isSameMeal = (meal1: DailyMealCreate, meal2: DailyMealCreate) => {
       return meal1.mealId === meal2.mealId && meal1.time === meal2.time;
     };
   
-    const mealsToCreate = meals.filter((meal) => {
+    const mealsToCreate = dailyMealsData.filter((meal) => {
       return !currentMeals.some((currentMeal) => isSameMeal(currentMeal, meal));
     });
   
-    const mealsToUpdate = meals.filter((meal) => {
+    const mealsToUpdate = dailyMealsData.filter((meal) => {
       return currentMeals.some((currentMeal) => isSameMeal(currentMeal, meal));
     });
   
     const mealsToDelete = currentMeals.filter((currentMeal) => {
-      return !meals.some((meal) => isSameMeal(currentMeal, meal));
+      return !dailyMealsData.some((meal) => isSameMeal(currentMeal, meal));
     });
   
-    await this.dailyMealRepository.update(routine.id, {
+    await this.dailyMealRepository.update(routineData.id, {
       mealsToCreate,
       mealsToUpdate,
       mealsToDelete,
     });
   
-    this.saveCalculatedFields(routine.id)
-  
-    return;
+    const routine = this.saveCalculatedFields(routineData.id)
+
+    return routine;
   }
   
 
@@ -77,7 +75,7 @@ export class RoutineUseCase {
 
     const calculatedFields = calculateFieldsBasedOnMeals(mealsToCalculate.map(mealItem => mealItem.meal))
 
-    await this.routineRepository.saveCalculatedFields(routineId, calculatedFields);
+    return await this.routineRepository.saveCalculatedFields(routineId, calculatedFields);
   }
 }
 

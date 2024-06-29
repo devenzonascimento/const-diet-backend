@@ -1,4 +1,5 @@
-import { DailyMeal } from "./daily-meal-interface";
+import { Prisma } from "@prisma/client";
+import { DailyMeal, DailyMealCreate } from "./daily-meal-interface";
 
 export interface Routine {
   id: string;
@@ -34,7 +35,8 @@ export interface CalculatedFields {
 }
 
 export interface RoutineRepository {
-  create: (data: RoutineCreate) => Promise<Routine>
+  create: (routineData: RoutineCreate, dailyMealsData: DailyMealCreate[]) => 
+    Promise<[Routine, Prisma.BatchPayload]>
   findById: (routineId: string) => Promise<RoutineComplete | null>
   getAll: (userId: string) => Promise<Routine[]>
   update: (data: RoutineUpdate) => Promise<Routine | null>
