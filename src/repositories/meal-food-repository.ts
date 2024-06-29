@@ -31,8 +31,20 @@ export class MealFoodRepositoryPrisma implements MealFoodRepository {
         mealId,
       },
       select: {
-        food: true,
         quantity: true,
+        food: {
+          select: {
+            id: true,
+            name: true,
+            unit: true,
+            calories: true,
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            fibers: true,
+            sodiums: true,            
+          }
+        }
       },
     });
   }
