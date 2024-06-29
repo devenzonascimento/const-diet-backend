@@ -1,12 +1,11 @@
 import { fastify, FastifyInstance } from "fastify";
 import { fastifyCors } from "@fastify/cors";
 
-import { authMiddleware } from "./middlewares/auth-middleware";
-
+import { authRoutes } from "./routes/auth-route";
 import { userRoutes } from "./routes/user-route";
 import { foodRoutes } from "./routes/food-route";
 import { mealRoutes } from "./routes/meal-route";
-import { authRoutes } from "./routes/auth-route";
+import { routineRoutes } from "./routes/routine-route";
 
 const server: FastifyInstance = fastify();
 
@@ -34,7 +33,12 @@ server.register(mealRoutes, {
   prefix: "users/:userId/meals",
 });
 
+server.register(routineRoutes, {
+  prefix: "users/:userId/routines",
+});
 /*
+
+
 server.register(foodRoutes, {
   prefix: "users/:userId/foods",
 });
