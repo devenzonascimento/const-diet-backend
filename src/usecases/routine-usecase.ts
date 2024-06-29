@@ -36,34 +36,36 @@ export class RoutineUseCase {
 
   async update(routine: RoutineUpdate, meals: DailyMealCreate[]) {
     await this.routineRepository.update(routine);
-
+  
     const currentMeals = await this.dailyMealRepository.findMany(routine.id);
-    const currentMealIds = currentMeals.map((meal) => meal.mealId);
-
-    const newMealIds = meals.map((meal) => meal.mealId);
-
+  
+    const isSameMeal = (meal1: DailyMealCreate, meal2: DailyMealCreate) => {
+      return meal1.mealId === meal2.mealId && meal1.time === meal2.time;
+    };
+  
     const mealsToCreate = meals.filter((meal) => {
-      return !currentMealIds.includes(meal.mealId);
+      return !currentMeals.some((currentMeal) => isSameMeal(currentMeal, meal));
     });
-
+  
     const mealsToUpdate = meals.filter((meal) => {
-      return currentMealIds.includes(meal.mealId);
+      return currentMeals.some((currentMeal) => isSameMeal(currentMeal, meal));
     });
-
-    const mealsToDelete = currentMeals.filter((meal) => {
-      return !newMealIds.includes(meal.mealId);
+  
+    const mealsToDelete = currentMeals.filter((currentMeal) => {
+      return !meals.some((meal) => isSameMeal(currentMeal, meal));
     });
-
+  
     await this.dailyMealRepository.update(routine.id, {
       mealsToCreate,
       mealsToUpdate,
       mealsToDelete,
     });
-
+  
     this.saveCalculatedFields(routine.id)
-
+  
     return;
   }
+  
 
   async delete(routineId: string) {
     return await this.routineRepository.delete(routineId);
