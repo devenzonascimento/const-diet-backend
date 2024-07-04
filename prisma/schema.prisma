@@ -27,46 +27,54 @@ model User {
 
 model Plan {
   id        String         @id @default(uuid())
-  userId    String
+  name      String
+  goal      String
   startDate DateTime
   endDate   DateTime
-  goal      String
+  userId    String
   routines  DailyRoutine[]
   user      User           @relation(fields: [userId], references: [id])
 }
 
 model DailyRoutine {
-  planId    String
-  routineId String
-  date      DateTime
-  status    Status   @default(PENDING)
-  plan      Plan     @relation(fields: [planId], references: [id])
-  routine   Routine  @relation(fields: [routineId], references: [id])
-
-  @@id([planId, routineId])
-}
-
-model Routine {
-  id                 String         @id @default(uuid())
-  name               String
-  water              Int            @default(0)
-  totalCalories      Float          @default(0)
-  totalCarbohydrates Float          @default(0)
-  totalProteins      Float          @default(0)
-  totalFats          Float          @default(0)
-  totalSodiums       Float          @default(0)
-  totalFibers        Float          @default(0)
-  userId             String
-  meals              DailyMeal[]
-  plans              DailyRoutine[]
-  User               User           @relation(fields: [userId], references: [id])
+  id         String      @id @default(uuid())
+  date       DateTime
+  status     Status      @default(PENDING)
+  planId     String
+  plan       Plan        @relation(fields: [planId], references: [id])
+  dailyMeals DailyMeal[]
 }
 
 model DailyMeal {
+  dailyRoutineId String
+  mealId         String
+  time           String
+  status         Status       @default(PENDING)
+  meal           Meal         @relation(fields: [mealId], references: [id])
+  dailyRoutine   DailyRoutine @relation(fields: [dailyRoutineId], references: [id])
+
+  @@id([dailyRoutineId, mealId, time])
+}
+
+model Routine {
+  id                 String        @id @default(uuid())
+  name               String
+  water              Int           @default(0)
+  totalCalories      Float         @default(0)
+  totalCarbohydrates Float         @default(0)
+  totalProteins      Float         @default(0)
+  totalFats          Float         @default(0)
+  totalSodiums       Float         @default(0)
+  totalFibers        Float         @default(0)
+  userId             String
+  meals              RoutineMeal[]
+  User               User          @relation(fields: [userId], references: [id])
+}
+
+model RoutineMeal {
   routineId String
   mealId    String
   time      String
-  status    Status  @default(PENDING)
   meal      Meal    @relation(fields: [mealId], references: [id])
   routine   Routine @relation(fields: [routineId], references: [id])
 
@@ -74,18 +82,19 @@ model DailyMeal {
 }
 
 model Meal {
-  id                 String      @id @default(uuid())
+  id                 String        @id @default(uuid())
   name               String
-  totalCalories      Float          @default(0)
-  totalCarbohydrates Float          @default(0)
-  totalProteins      Float          @default(0)
-  totalFats          Float          @default(0)
-  totalSodiums       Float          @default(0)
-  totalFibers        Float          @default(0)
+  totalCalories      Float         @default(0)
+  totalCarbohydrates Float         @default(0)
+  totalProteins      Float         @default(0)
+  totalFats          Float         @default(0)
+  totalSodiums       Float         @default(0)
+  totalFibers        Float         @default(0)
   userId             String
-  routines           DailyMeal[]
-  User               User        @relation(fields: [userId], references: [id])
+  routines           RoutineMeal[]
+  User               User          @relation(fields: [userId], references: [id])
   foods              MealFood[]
+  DailyMeal          DailyMeal[]
 }
 
 model MealFood {
