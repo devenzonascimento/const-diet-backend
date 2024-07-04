@@ -7,9 +7,10 @@ import {
   RoutineUpdate,
   CalculatedFields,
 } from "../interfaces/routine-interface.js";
+import { RoutineMealCreate } from "../interfaces/routine-meal-interface.js";
 
 export class RoutineRepositoryPrisma implements RoutineRepository {
-  async create(routineData: RoutineCreate, dailyMealsData: DailyMealCreate[]) {
+  async create(routineData: RoutineCreate, routineMealsData: RoutineMealCreate[]) {
 
     const routineId = crypto.randomUUID()
 
@@ -22,12 +23,11 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
           userId: routineData.userId,
         },
       }),
-      prisma.dailyMeal.createMany({
-        data: dailyMealsData.map((meal) => ({
+      prisma.routineMeal.createMany({
+        data: routineMealsData.map((meal) => ({
           routineId,
           mealId: meal.mealId,
-          time: meal.time,
-          status: meal.status,          
+          time: meal.time,          
         })),
       })
     ])
@@ -44,7 +44,6 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         water: true,
         meals: {
           select: {
-            status: true,
             time: true,
             meal: {
               select: {
@@ -87,7 +86,6 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         totalFibers: true,
         meals: {
           select: {
-            status: true,
             time: true,
             meal: {
               select: {
@@ -127,7 +125,7 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
 
   async delete(routineId: string) {
     await prisma.$transaction([
-      prisma.dailyMeal.deleteMany({
+      prisma.routineMeal.deleteMany({
         where: {
           routineId,
         },
@@ -160,8 +158,7 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         totalSodiums: true,
         totalFibers: true,
         meals: {
-          select: {
-            status: true,
+          select: {            
             time: true,
             meal: {
               select: {

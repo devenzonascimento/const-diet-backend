@@ -1,25 +1,11 @@
 import { prisma } from "../database/prisma-client.js";
-import {
-  DailyMealCreate,
-  DailyMealRepository,
-  DailyMealUpdate,
-} from "../interfaces/daily-meal-interface.js";
+import { RoutineMealRepository, RoutineMealUpdate } from "../interfaces/routine-meal-interface.js";
 
-export class DailyMealRepositoryPrisma implements DailyMealRepository {
-  async createMany(routineId: string, data: DailyMealCreate[]) {
-    return await prisma.dailyMeal.createMany({
-      data: data.map((meal) => ({
-        routineId,
-        mealId: meal.mealId,
-        time: meal.time,
-        status: meal.status,
-        
-      })),
-    });
-  }
+
+export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
 
   async findMany(routineId: string) {
-    return await prisma.dailyMeal.findMany({
+    return await prisma.routineMeal.findMany({
       where: {
         routineId,
       },
@@ -27,12 +13,11 @@ export class DailyMealRepositoryPrisma implements DailyMealRepository {
   }
 
   async getAllMealsByRoutineId(routineId: string) {
-    return await prisma.dailyMeal.findMany({
+    return await prisma.routineMeal.findMany({
       where: {
         routineId
       },
-      select: {
-        status: true,
+      select: {    
         time: true,
         meal: {
           select: {
@@ -50,21 +35,21 @@ export class DailyMealRepositoryPrisma implements DailyMealRepository {
     });
   }
 
-  async update(routineId: string, meals: DailyMealUpdate) {
+  async update(routineId: string, meals: RoutineMealUpdate) {
     await prisma.$transaction([
-      ...meals.mealsToCreate.map(({ mealId, status, time }) =>
-        prisma.dailyMeal.create({
+      ...meals.mealsToCreate.map(({ mealId, time }) =>
+        prisma.routineMeal.create({
           data: {
             routineId,
             mealId,
-            status,
+        
             time,
           },
         })
       ),
 
-      ...meals.mealsToUpdate.map(({ mealId, status, time }) =>
-        prisma.dailyMeal.update({
+      ...meals.mealsToUpdate.map(({ mealId, time }) =>
+        prisma.routineMeal.update({
           where: {
             routineId_mealId_time: {
               routineId,
@@ -72,15 +57,14 @@ export class DailyMealRepositoryPrisma implements DailyMealRepository {
               time
             },
           },
-          data: {
-            status,
+          data: {        
             time,
           },
         })
       ),
 
       ...meals.mealsToDelete.map(({ mealId, time }) =>
-        prisma.dailyMeal.delete({
+        prisma.routineMeal.delete({
           where: {
             routineId_mealId_time: {
               routineId,
@@ -94,7 +78,7 @@ export class DailyMealRepositoryPrisma implements DailyMealRepository {
   }
 
   async getCalculatedFieldsByRoutineId(routineId: string) {
-    return await prisma.dailyMeal.findMany({
+    return await prisma.routineMeal.findMany({
       where: {
         routineId,
       },

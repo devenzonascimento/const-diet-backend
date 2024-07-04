@@ -1,22 +1,21 @@
 import { calculateFieldsBasedOnMeals } from "../functions/calculate-fields-based-on-meals.js";
-import { DailyMealCreate } from "../interfaces/daily-meal-interface.js";
-import {
-  RoutineCreate,
-  RoutineUpdate,
-} from "../interfaces/routine-interface.js";
-import { DailyMealRepositoryPrisma } from "../repositories/daily-meal-repository.js";
+
 import { RoutineRepositoryPrisma } from "../repositories/routine-repository.js";
+import { RoutineMealRepositoryPrisma } from "../repositories/routine-meal-repository.js";
+
+import { RoutineCreate, RoutineUpdate } from "../interfaces/routine-interface.js";
+import { RoutineMealCreate } from "../interfaces/routine-meal-interface.js";
 
 export class RoutineUseCase {
   private routineRepository;
-  private dailyMealRepository;
+  private routineMealRepository;
 
   constructor() {
     this.routineRepository = new RoutineRepositoryPrisma();
-    this.dailyMealRepository = new DailyMealRepositoryPrisma();
+    this.routineMealRepository = new RoutineMealRepositoryPrisma();
   }
 
-  async create(routineData: RoutineCreate, dailyMealsData: DailyMealCreate[]) {
+  async create(routineData: RoutineCreate, dailyMealsData: RoutineMealCreate[]) {
     const [{ id }] = await this.routineRepository.create(routineData, dailyMealsData);
 
     const routine = this.saveCalculatedFields(id)
@@ -32,12 +31,12 @@ export class RoutineUseCase {
     return await this.routineRepository.getAll(userId);
   }
 
-  async update(routineData: RoutineUpdate, dailyMealsData: DailyMealCreate[]) {
+  async update(routineData: RoutineUpdate, dailyMealsData: RoutineMealCreate[]) {
     await this.routineRepository.update(routineData);
   
-    const currentMeals = await this.dailyMealRepository.findMany(routineData.id);
+    const currentMeals = await this.routineMealRepository.findMany(routineData.id);
   
-    const isSameMeal = (meal1: DailyMealCreate, meal2: DailyMealCreate) => {
+    const isSameMeal = (meal1: RoutineMealCreate, meal2: RoutineMealCreate) => {
       return meal1.mealId === meal2.mealId && meal1.time === meal2.time;
     };
   
@@ -53,7 +52,7 @@ export class RoutineUseCase {
       return !dailyMealsData.some((meal) => isSameMeal(currentMeal, meal));
     });
   
-    await this.dailyMealRepository.update(routineData.id, {
+    await this.routineMealRepository.update(routineData.id, {
       mealsToCreate,
       mealsToUpdate,
       mealsToDelete,
@@ -71,7 +70,7 @@ export class RoutineUseCase {
 
   async saveCalculatedFields(routineId: string) {
     const mealsToCalculate =
-      await this.dailyMealRepository.getCalculatedFieldsByRoutineId(routineId);
+      await this.routineMealRepository.getCalculatedFieldsByRoutineId(routineId);
 
     const calculatedFields = calculateFieldsBasedOnMeals(mealsToCalculate.map(mealItem => mealItem.meal))
 
