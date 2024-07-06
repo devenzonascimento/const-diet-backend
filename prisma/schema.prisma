@@ -21,8 +21,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   foods         Food[]
   meals         Meal[]
-  plans         Plan[]
   routines      Routine[]
+  plans         Plan[]
 }
 
 model Plan {
@@ -37,23 +37,51 @@ model Plan {
 }
 
 model DailyRoutine {
-  id         String      @id @default(uuid())
-  date       DateTime
-  status     Status      @default(PENDING)
-  planId     String
-  plan       Plan        @relation(fields: [planId], references: [id])
-  dailyMeals DailyMeal[]
+  id                 String      @id @default(uuid())
+  name               String
+  date               DateTime
+  status             Status      @default(PENDING)
+  water              Int         @default(0)
+  totalCalories      Float       @default(0)
+  totalCarbohydrates Float       @default(0)
+  totalProteins      Float       @default(0)
+  totalFats          Float       @default(0)
+  totalSodiums       Float       @default(0)
+  totalFibers        Float       @default(0)
+  planId             String
+  plan               Plan        @relation(fields: [planId], references: [id])
+  meals              DailyMeal[]
 }
 
 model DailyMeal {
-  dailyRoutineId String
-  mealId         String
-  time           String
-  status         Status       @default(PENDING)
-  meal           Meal         @relation(fields: [mealId], references: [id])
-  dailyRoutine   DailyRoutine @relation(fields: [dailyRoutineId], references: [id])
+  id                 String          @id @default(uuid())
+  name               String
+  time               String
+  status             Status          @default(PENDING)
+  totalCalories      Float           @default(0)
+  totalCarbohydrates Float           @default(0)
+  totalProteins      Float           @default(0)
+  totalFats          Float           @default(0)
+  totalSodiums       Float           @default(0)
+  totalFibers        Float           @default(0)
+  routineId          String
+  routine            DailyRoutine    @relation(fields: [routineId], references: [id])
+  foods              DailyMealFood[]
+}
 
-  @@id([dailyRoutineId, mealId, time])
+model DailyMealFood {
+  id            String    @id @default(uuid())
+  name          String
+  unit          Unit      @default(GRAMS)
+  quantity      Float
+  calories      Float
+  carbohydrates Float
+  proteins      Float
+  fats          Float
+  sodiums       Float
+  fibers        Float
+  mealId        String
+  meal          DailyMeal @relation(fields: [mealId], references: [id])
 }
 
 model Routine {
@@ -67,16 +95,16 @@ model Routine {
   totalSodiums       Float         @default(0)
   totalFibers        Float         @default(0)
   userId             String
-  meals              RoutineMeal[]
   User               User          @relation(fields: [userId], references: [id])
+  meals              RoutineMeal[]
 }
 
 model RoutineMeal {
   routineId String
   mealId    String
   time      String
-  meal      Meal    @relation(fields: [mealId], references: [id])
   routine   Routine @relation(fields: [routineId], references: [id])
+  meal      Meal    @relation(fields: [mealId], references: [id])
 
   @@id([routineId, mealId, time])
 }
@@ -91,18 +119,17 @@ model Meal {
   totalSodiums       Float         @default(0)
   totalFibers        Float         @default(0)
   userId             String
-  routines           RoutineMeal[]
   User               User          @relation(fields: [userId], references: [id])
+  routines           RoutineMeal[]
   foods              MealFood[]
-  DailyMeal          DailyMeal[]
 }
 
 model MealFood {
-  quantity Float
-  foodId   String
   mealId   String
-  food     Food   @relation(fields: [foodId], references: [id])
+  foodId   String
+  quantity Float
   meal     Meal   @relation(fields: [mealId], references: [id])
+  food     Food   @relation(fields: [foodId], references: [id])
 
   @@id([mealId, foodId])
 }
