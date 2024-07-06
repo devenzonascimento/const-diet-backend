@@ -6,6 +6,7 @@ import { userRoutes } from "./routes/user-route";
 import { foodRoutes } from "./routes/food-route";
 import { mealRoutes } from "./routes/meal-route";
 import { routineRoutes } from "./routes/routine-route";
+import { planRoutes } from "./routes/plan-route";
 
 const server: FastifyInstance = fastify();
 
@@ -36,30 +37,9 @@ server.register(mealRoutes, {
 server.register(routineRoutes, {
   prefix: "users/:userId/routines",
 });
-/*
-
-
-server.register(foodRoutes, {
-  prefix: "users/:userId/foods",
-});
-
-
-
-server.register(rotineRoutes, {
-  prefix: "/routines",
-});
-
-server.register(foodInMealRoutes, {
-  prefix: "/users/:userId/meals/:mealId/foods",
-});
-
-server.register(dailyMealRoutes, {
-  prefix: "/users/daily-meals",
-});
 
 server.register(planRoutes, {
-  prefix: "/users/plan",
+  prefix: "users/:userId/plans",
 });
-*/
 
 server.listen({ port: 3333 }, () => console.log("SERVIDOR ONLINE"));
