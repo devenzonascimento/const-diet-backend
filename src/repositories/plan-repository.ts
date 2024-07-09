@@ -37,7 +37,7 @@ export class PlanRepositoryPrisma implements PlanRepository {
       });
 
       if (routineData) {
-        for (const date of routine.date) {
+        for (const date of routine.dates) {
           const routineId = crypto.randomUUID();
 
           await prisma.dailyRoutine.create({
@@ -95,11 +95,40 @@ export class PlanRepositoryPrisma implements PlanRepository {
     return await prisma.plan.findUnique({
       where: {
         id: planId,
-      }
+      },
+    });
+  }
+
+  async getAll(userId: string) {
+    return await prisma.plan.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        goal: true,
+        startDate: true,
+        endDate: true,
+        routines: {
+          select: {
+            id: true,
+            name: true,
+            date: true,
+            status: true,
+            water: true,
+            totalCalories: true,
+            totalCarbohydrates: true,
+            totalProteins: true,
+            totalFats: true,
+            totalSodiums: true,
+            totalFibers: true,            
+          },
+        },
+      },
     });
   }
 }
-
 /*
 
 
