@@ -14,10 +14,11 @@ export interface PlanCreate {
   userId: string;
   routines: {
     routineId: string;
-    date: Date[];
+    dates: Date[];
   }[];
 }
 
 export interface PlanRepository {
   create: ( planData: PlanCreate ) => Promise<Plan | null>;
+  getAll: (userId: string) => Promise<Plan[]>
 }
