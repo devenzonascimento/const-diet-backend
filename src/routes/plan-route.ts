@@ -1,5 +1,9 @@
 import { FastifyInstance } from "fastify";
+
 import { PlanUseCase } from "../usecases/plan-usecase.js";
+
+import { authMiddleware } from "../middlewares/auth-middleware.js";
+
 import { PlanCreate } from "../interfaces/plan-interface.js";
 
 interface RequestParams {
@@ -9,6 +13,8 @@ interface RequestParams {
 
 export const planRoutes = async (server: FastifyInstance) => {
   const planUseCase = new PlanUseCase()
+
+  server.addHook("preHandler", authMiddleware)
 
   server.post<{ Params: RequestParams; Body: PlanCreate }>(
     "/",
@@ -33,9 +39,9 @@ export const planRoutes = async (server: FastifyInstance) => {
       try {
         const { userId } = req.params;
 
-        const plan = await planUseCase.getAll(userId);
+        const plans = await planUseCase.getAll(userId);
 
-        reply.code(200).send(plan);
+        reply.code(200).send(plans);
       } catch (error) {
         reply.code(500).send(error);
       }
