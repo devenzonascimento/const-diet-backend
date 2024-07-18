@@ -1,4 +1,4 @@
-import { MealComplete } from "./meal-interface";
+import { CalculatedFields, MealComplete } from "./meal-interface";
 
 export interface RoutineMeal {
   time: string;
@@ -31,8 +31,11 @@ export interface RoutineMealUpdate {
   }[];
 }
 
+export interface FieldsToBeCalculated {
+  meal: CalculatedFields
+}
+
 export interface RoutineMealRepository {
   findMany: (routineId: string) => Promise<RoutineMealComplete[]>;
-  getAllMealsByRoutineId: (routineId: string) => Promise<RoutineMeal[]>;
-  update: (routineId: string, meals: RoutineMealUpdate) => Promise<void>;
+  getCalculatedFieldsByRoutineId: (routineId: string) => Promise<FieldsToBeCalculated[]>;
 }
