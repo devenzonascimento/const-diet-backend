@@ -26,9 +26,9 @@ export const routineRoutes = async (server: FastifyInstance) => {
     "/",
     async (req, reply) => {
       try {
-        const { name, water, meals } = req.body;
-
         const { userId } = req.params;
+        
+        const { name, water, meals } = req.body;
 
         const routine = await routineUseCase.create({ userId, name, water }, meals);
 
@@ -55,9 +55,9 @@ export const routineRoutes = async (server: FastifyInstance) => {
     "/:routineId",
     async (req, reply) => {
       try {
-        const { name, water, meals } = req.body;
-
         const { routineId } = req.params;
+        
+        const { name, water, meals } = req.body;
 
         const routine = await routineUseCase.update({ id: routineId, name, water }, meals);
 

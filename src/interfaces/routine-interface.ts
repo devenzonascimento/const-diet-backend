@@ -1,6 +1,5 @@
-import { Prisma } from "@prisma/client";
-
-import { RoutineMeal, RoutineMealCreate } from "./routine-meal-interface";
+import { RoutineMealCreate, RoutineMealUpdate } from "./routine-meal-interface";
+import { Meal } from "./meal-interface";
 
 export interface Routine {
   id: string;
@@ -11,12 +10,12 @@ export interface Routine {
 export interface RoutineCreate {
   userId: string;
   name: string;
-  water: number
+  water: number;
 }
 export interface RoutineUpdate {
   id: string;
   name: string;
-  water: number
+  water: number;
 }
 
 export interface RoutineComplete {
@@ -29,7 +28,10 @@ export interface RoutineComplete {
   fats: number;
   fibers: number;
   sodium: number;
-  meals: RoutineMeal[]
+  meals: {
+    time: string;
+    meal: Meal & CalculatedFields;
+  }[];
 }
 
 export interface CalculatedFields {
@@ -42,11 +44,16 @@ export interface CalculatedFields {
 }
 
 export interface RoutineRepository {
-  create: (routineData: RoutineCreate, routineMealsData: RoutineMealCreate[]) => 
-    Promise<[Routine, Prisma.BatchPayload]>
-  findById: (routineId: string) => Promise<RoutineComplete | null>
-  getAll: (userId: string) => Promise<Routine[]>
-  update: (data: RoutineUpdate) => Promise<Routine | null>
-  delete: (routineId: string) => Promise<void>
-  //saveCalculatedFields
+  create: (
+    routineData: RoutineCreate,
+    mealsData: RoutineMealCreate[]
+  ) => Promise<Routine>;
+  findById: (routineId: string) => Promise<RoutineComplete | null>;
+  getAll: (userId: string) => Promise<Routine[]>;
+  update: (routineData: RoutineUpdate, mealsData: RoutineMealUpdate) => Promise<Routine>;
+  delete: (routineId: string) => Promise<void>;
+  saveCalculatedFields: (
+    routineId: string,
+    calculatedFields: CalculatedFields
+  ) => Promise<RoutineComplete>;
 }

@@ -15,10 +15,10 @@ export class RoutineUseCase {
     this.routineMealRepository = new RoutineMealRepositoryPrisma();
   }
 
-  async create(routineData: RoutineCreate, dailyMealsData: RoutineMealCreate[]) {
-    const [{ id }] = await this.routineRepository.create(routineData, dailyMealsData);
+  async create(routineData: RoutineCreate, mealsData: RoutineMealCreate[]) {
+    const { id } = await this.routineRepository.create(routineData, mealsData);
 
-    const routine = this.saveCalculatedFields(id)
+    const routine = await this.saveCalculatedFields(id)
 
     return routine;
   }
@@ -31,34 +31,33 @@ export class RoutineUseCase {
     return await this.routineRepository.getAll(userId);
   }
 
-  async update(routineData: RoutineUpdate, dailyMealsData: RoutineMealCreate[]) {
-    await this.routineRepository.update(routineData);
-  
+  async update(routineData: RoutineUpdate, mealsData: RoutineMealCreate[]) {
+    
     const currentMeals = await this.routineMealRepository.findMany(routineData.id);
   
     const isSameMeal = (meal1: RoutineMealCreate, meal2: RoutineMealCreate) => {
       return meal1.mealId === meal2.mealId && meal1.time === meal2.time;
     };
   
-    const mealsToCreate = dailyMealsData.filter((meal) => {
+    const mealsToCreate = mealsData.filter((meal) => {
       return !currentMeals.some((currentMeal) => isSameMeal(currentMeal, meal));
     });
   
-    const mealsToUpdate = dailyMealsData.filter((meal) => {
+    const mealsToUpdate = mealsData.filter((meal) => {
       return currentMeals.some((currentMeal) => isSameMeal(currentMeal, meal));
     });
   
     const mealsToDelete = currentMeals.filter((currentMeal) => {
-      return !dailyMealsData.some((meal) => isSameMeal(currentMeal, meal));
+      return !mealsData.some((meal) => isSameMeal(currentMeal, meal));
     });
-  
-    await this.routineMealRepository.update(routineData.id, {
+
+    await this.routineRepository.update(routineData, {
       mealsToCreate,
       mealsToUpdate,
       mealsToDelete,
     });
   
-    const routine = this.saveCalculatedFields(routineData.id)
+    const routine = await this.saveCalculatedFields(routineData.id)
 
     return routine;
   }

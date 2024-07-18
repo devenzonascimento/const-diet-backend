@@ -1,5 +1,4 @@
 import { prisma } from "../database/prisma-client.js";
-import { DailyMealCreate } from "../interfaces/daily-meal-interface.js";
 
 import {
   RoutineRepository,
@@ -7,32 +6,29 @@ import {
   RoutineUpdate,
   CalculatedFields,
 } from "../interfaces/routine-interface.js";
-import { RoutineMealCreate } from "../interfaces/routine-meal-interface.js";
+
+import {
+  RoutineMealCreate,
+  RoutineMealUpdate,
+} from "../interfaces/routine-meal-interface.js";
 
 export class RoutineRepositoryPrisma implements RoutineRepository {
-  async create(
-    routineData: RoutineCreate,
-    routineMealsData: RoutineMealCreate[]
-  ) {
-    const routineId = crypto.randomUUID();
-
-    return await prisma.$transaction([
-      prisma.routine.create({
-        data: {
-          id: routineId,
-          name: routineData.name,
-          water: routineData.water,
-          userId: routineData.userId,
+  async create(routineData: RoutineCreate, mealsData: RoutineMealCreate[]) {
+    return await prisma.routine.create({
+      data: {
+        name: routineData.name,
+        water: routineData.water,
+        userId: routineData.userId,
+        meals: {
+          createMany: {
+            data: mealsData.map((meal) => ({
+              mealId: meal.mealId,
+              time: meal.time,
+            })),
+          },
         },
-      }),
-      prisma.routineMeal.createMany({
-        data: routineMealsData.map((meal) => ({
-          routineId,
-          mealId: meal.mealId,
-          time: meal.time,
-        })),
-      }),
-    ]);
+      },
+    });
   }
 
   async findById(routineId: string) {
@@ -119,14 +115,36 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
     });
   }
 
-  async update(data: RoutineUpdate) {
+  async update(routineData: RoutineUpdate, mealsData: RoutineMealUpdate) {
     return await prisma.routine.update({
       where: {
-        id: data.id,
+        id: routineData.id,
       },
       data: {
-        name: data.name,
-        water: data.water,
+        name: routineData.name,
+        water: routineData.water,
+        meals: {
+          createMany: {
+            data: mealsData.mealsToCreate.map((meal) => ({
+              mealId: meal.mealId,
+              time: meal.time,
+            })),
+          },
+          updateMany: mealsData.mealsToUpdate.map((meal) => ({
+            where: {
+              mealId: meal.mealId,
+              time: meal.time,
+            },
+            data: {
+              mealId: meal.mealId,
+              time: meal.time,
+            },
+          })),
+          deleteMany: mealsData.mealsToDelete.map((meal) => ({
+            mealId: meal.mealId,
+            time: meal.time,
+          })),
+        },
       },
     });
   }
