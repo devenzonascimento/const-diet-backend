@@ -25,9 +25,9 @@ export const mealRoutes = async (server: FastifyInstance) => {
     "/",
     async (req, reply) => {
       try {
-        const { name, foods } = req.body;
-
         const { userId } = req.params;
+        
+        const { name, foods } = req.body;
 
         const meal = await mealUseCase.create({ userId, name }, foods);
 
@@ -37,14 +37,14 @@ export const mealRoutes = async (server: FastifyInstance) => {
       }
     }
   );
-
+  
   server.get<{ Params: RequestParams }>("/:mealId", async (req, reply) => {
     try {
       const { mealId } = req.params;
 
       const meal = await mealUseCase.findById(mealId);
 
-      reply.send(meal);
+      reply.code(200).send(meal);
     } catch (error) {
       reply.code(500).send(error);
     }
@@ -54,13 +54,13 @@ export const mealRoutes = async (server: FastifyInstance) => {
     "/:mealId",
     async (req, reply) => {
       try {
+        const { mealId } = req.params;
+        
         const { name, foods } = req.body;
 
-        const { mealId } = req.params;
+        const meal = await mealUseCase.update({ id: mealId, name }, foods);
 
-        await mealUseCase.update({ id: mealId, name }, foods);
-
-        reply.code(200).send();
+        reply.code(200).send(meal);
       } catch (error) {
         console.log(error);
         reply.code(500).send(error);

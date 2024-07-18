@@ -3,8 +3,8 @@ import { MealFoodRepositoryPrisma } from "../repositories/meal-food-repository.j
 
 import { MealCreate, MealUpdate } from "../interfaces/meal-interface.js";
 import { MealFoodCreate } from "../interfaces/meal-food-interface.js";
-import { calculateTotalCalories } from "../functions/calculate-total-calories.js";
-import { calculateTotalNutrients } from "../functions/calculate-total-nutrients.js";
+
+import { calculateFieldsBasedOnFoods } from "../functions/calculate-fields-based-on-foods.js";
 
 export class MealUseCase {
   private mealRepository;
@@ -16,11 +16,9 @@ export class MealUseCase {
   }
 
   async create(mealData: MealCreate, foodsData: MealFoodCreate[]) {
-    const meal = await this.mealRepository.create(mealData);
+    const { id } = await this.mealRepository.create(mealData, foodsData);
 
-    await this.mealFoodRepository.createMany(meal.id, foodsData);
-
-    this.saveCalculatedFields(meal.id)
+    const meal = await this.saveCalculatedFields(id)
 
     return meal;
   }
@@ -33,19 +31,18 @@ export class MealUseCase {
     return await this.mealRepository.getAll(userId);
   }
 
-  async update(meal: MealUpdate, foods: MealFoodCreate[]) {
-    await this.mealRepository.update(meal);
+  async update(mealData: MealUpdate, foodsData: MealFoodCreate[]) {
+    
+    const currentFoods = await this.mealFoodRepository.findMany(mealData.id);
 
-    const currentFoods = await this.mealFoodRepository.findMany(meal.id);
     const currentFoodIds = currentFoods.map((food) => food.foodId);
+    const newFoodIds = foodsData.map((food) => food.foodId);
 
-    const newFoodIds = foods.map((food) => food.foodId);
-
-    const foodsToCreate = foods.filter((food) => {
+    const foodsToCreate = foodsData.filter((food) => {
       return !currentFoodIds.includes(food.foodId);
     });
 
-    const foodsToUpdate = foods.filter((food) => {
+    const foodsToUpdate = foodsData.filter((food) => {
       return currentFoodIds.includes(food.foodId);
     });
 
@@ -53,15 +50,15 @@ export class MealUseCase {
       return !newFoodIds.includes(food.foodId);
     });
 
-    await this.mealFoodRepository.update(meal.id, {
+    await this.mealRepository.update(mealData, {
       foodsToCreate,
       foodsToUpdate,
       foodsToDelete,
     });
 
-    this.saveCalculatedFields(meal.id)
+    const meal = await this.saveCalculatedFields(mealData.id)
 
-    return;
+    return meal;
   }
 
   async delete(mealId: string) {
@@ -71,16 +68,8 @@ export class MealUseCase {
   async saveCalculatedFields(mealId: string) {
     const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(mealId);
 
-    const totalCalories = calculateTotalCalories(foodsToCalculate);
-    const totalNutrients = calculateTotalNutrients(foodsToCalculate);
+    const calculatedFields = calculateFieldsBasedOnFoods(foodsToCalculate)
 
-    await this.mealRepository.saveCalculatedFields(mealId, {
-      totalCalories,
-      totalCarbohydrates: totalNutrients.carbohydrates,
-      totalProteins: totalNutrients.proteins,
-      totalFats: totalNutrients.fats,
-      totalSodiums: totalNutrients.sodiums,
-      totalFibers: totalNutrients.fibers,
-    });
+    return await this.mealRepository.saveCalculatedFields(mealId, calculatedFields);
   }
 }
