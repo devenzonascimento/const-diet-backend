@@ -7,18 +7,18 @@ import {
 } from "../interfaces/food-interface.js";
 
 export class FoodRepositoryPrisma implements FoodRepository {
-  async create(data: FoodCreate) {
+  async create(foodData: FoodCreate) {
     return await prisma.food.create({
       data: {
-        userId: data.userId,
-        name: data.name,
-        unit: data.unit,
-        calories: data.calories,
-        carbohydrates: data.carbohydrates,
-        proteins: data.proteins,
-        fats: data.fats,
-        sodiums: data.sodiums,
-        fibers: data.fibers,
+        userId: foodData.userId,
+        name: foodData.name,
+        unit: foodData.unit,
+        calories: foodData.calories,
+        carbohydrates: foodData.carbohydrates,
+        proteins: foodData.proteins,
+        fats: foodData.fats,
+        sodium: foodData.sodium,
+        fibers: foodData.fibers,
       },
     });
   }
@@ -36,7 +36,7 @@ export class FoodRepositoryPrisma implements FoodRepository {
         carbohydrates: true,
         proteins: true,
         fats: true,
-        sodiums: true,
+        sodium: true,
         fibers: true,
       },
     });
@@ -52,23 +52,27 @@ export class FoodRepositoryPrisma implements FoodRepository {
   }
 
   async getAll(userId: string) {
-    return await prisma.food.findMany({ where: { userId } });
+    return await prisma.food.findMany({ 
+      where: { 
+        userId
+      }
+    });
   }
 
-  async update(foodId: string, data: FoodUpdate) {
+  async update(foodData: FoodUpdate) {
     return await prisma.food.update({
       where: {
-        id: foodId,
+        id: foodData.id,
       },
       data: {
-        name: data.name,
-        unit: data.unit,
-        calories: data.calories,
-        carbohydrates: data.carbohydrates,
-        proteins: data.proteins,
-        fats: data.fats,
-        sodiums: data.sodiums,
-        fibers: data.fibers,
+        name: foodData.name,
+        unit: foodData.unit,
+        calories: foodData.calories,
+        carbohydrates: foodData.carbohydrates,
+        proteins: foodData.proteins,
+        fats: foodData.fats,
+        sodium: foodData.sodium,
+        fibers: foodData.fibers,
       },
     });
   }
