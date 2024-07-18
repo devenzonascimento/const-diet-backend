@@ -57,7 +57,7 @@ export const foodRoutes = async (server: FastifyInstance) => {
     }
   });
 
-  server.put<{ Params: RequestParams; Body: FoodUpdate }>(
+  server.put<{ Params: RequestParams; Body: Omit<FoodUpdate, "id"> }>(
     "/:foodId",
     async (req, reply) => {
       try {
@@ -65,7 +65,7 @@ export const foodRoutes = async (server: FastifyInstance) => {
 
         const data = req.body;
 
-        const food = await foodUseCase.update(userId, foodId, data);
+        const food = await foodUseCase.update(userId, {id: foodId, ...data});
 
         reply.code(200).send(food);
       } catch (error) {

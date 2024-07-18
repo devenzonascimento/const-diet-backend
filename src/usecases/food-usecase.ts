@@ -9,17 +9,17 @@ export class FoodUseCase {
     this.foodRepository = new FoodRepositoryPrisma();
   }
 
-  async create(data: FoodCreate) {
+  async create(foodData: FoodCreate) {
     const existsFood = await this.foodRepository.findByName(
-      data.userId,
-      data.name
+      foodData.userId,
+      foodData.name
     );
 
     if (existsFood) {
       throw new Error("This food name already exists");
     }
 
-    return await this.foodRepository.create(data);
+    return await this.foodRepository.create(foodData);
   }
 
   async findById(foodId: string) {
@@ -30,14 +30,14 @@ export class FoodUseCase {
     return await this.foodRepository.getAll(userId);
   }
 
-  async update(userId: string, foodId: string, data: FoodUpdate) {
-    const existsFood = await this.foodRepository.findByName(userId, data.name);
+  async update(userId: string, foodData: FoodUpdate) {
+    const existsFood = await this.foodRepository.findByName(userId, foodData.name);
 
-    if (existsFood && existsFood.id !== foodId) {
+    if (existsFood && existsFood.id !== foodData.id) {
       throw new Error("This food name already exists");
     }
 
-    return await this.foodRepository.update(foodId, data);
+    return await this.foodRepository.update(foodData);
   }
 
   async delete(foodId: string) {
