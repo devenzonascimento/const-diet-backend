@@ -65,7 +65,7 @@ export class UserUseCase {
         password: user.password,
       },
       jwtKey,
-      { expiresIn: 15 * 60 }
+      { expiresIn: 60 * 60 * 24 }
     );
 
     return token;
