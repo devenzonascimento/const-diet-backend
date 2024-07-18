@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { Food } from "./food-interface";
 
 export interface MealFood {
@@ -32,9 +31,6 @@ export interface MealFoodUpdate {
 }
 
 export interface MealFoodRepository {
-  createMany: (mealId: string, data: MealFoodCreate[]) => Promise<Prisma.BatchPayload>
   findMany: (mealId: string) => Promise<MealFoodComplete[]>
   getAllFoodsByMealId: (mealId: string) => Promise<MealFood[]>
-  update: (mealId: string, foods: MealFoodUpdate) => Promise<void>
-  delete: (mealId: string, foodId: string) => Promise<void>
 }
