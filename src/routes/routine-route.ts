@@ -4,7 +4,7 @@ import { authMiddleware } from "../middlewares/auth-middleware.js";
 
 import { RoutineUseCase } from "../usecases/routine-usecase.js";
 
-import { DailyMealCreate } from "../interfaces/daily-meal-interface.js";
+import { RoutineMealCreate } from "../interfaces/routine-meal-interface.js";
 
 interface RequestParams {
   userId: string;
@@ -14,7 +14,7 @@ interface RequestParams {
 interface RequestBody {
   name: string;
   water: number;
-  meals: DailyMealCreate[];
+  meals: RoutineMealCreate[];
 }
 
 export const routineRoutes = async (server: FastifyInstance) => {
