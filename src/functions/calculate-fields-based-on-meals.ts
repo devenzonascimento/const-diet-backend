@@ -2,21 +2,21 @@ import { CalculatedFields } from "../interfaces/routine-interface";
 
 export const calculateFieldsBasedOnMeals = (meals: CalculatedFields[]) => {
   const calculatedFields: CalculatedFields = {
-    totalCalories: 0,
-    totalCarbohydrates: 0,
-    totalProteins: 0,
-    totalFats: 0,
-    totalSodiums: 0,
-    totalFibers: 0,
+    calories: 0,
+    carbohydrates: 0,
+    proteins: 0,
+    fats: 0,
+    sodium: 0,
+    fibers: 0,
   };
   
   meals.forEach((meal) => {
-    calculatedFields.totalCalories += meal.totalCalories;
-    calculatedFields.totalCarbohydrates += meal.totalCarbohydrates;
-    calculatedFields.totalProteins += meal.totalProteins;
-    calculatedFields.totalFats += meal.totalFats;
-    calculatedFields.totalSodiums += meal.totalSodiums;
-    calculatedFields.totalFibers += meal.totalFibers;
+    calculatedFields.calories += meal.calories;
+    calculatedFields.carbohydrates += meal.carbohydrates;
+    calculatedFields.proteins += meal.proteins;
+    calculatedFields.fats += meal.fats;
+    calculatedFields.sodium += meal.sodium;
+    calculatedFields.fibers += meal.fibers;
   });
 
   return calculatedFields;
