@@ -1,9 +1,10 @@
 import { prisma } from "../database/prisma-client.js";
-import { RoutineMealRepository, RoutineMealUpdate } from "../interfaces/routine-meal-interface.js";
-
+import {
+  RoutineMealRepository,
+  RoutineMealUpdate,
+} from "../interfaces/routine-meal-interface.js";
 
 export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
-
   async findMany(routineId: string) {
     return await prisma.routineMeal.findMany({
       where: {
@@ -15,22 +16,28 @@ export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
   async getAllMealsByRoutineId(routineId: string) {
     return await prisma.routineMeal.findMany({
       where: {
-        routineId
+        routineId,
       },
-      select: {    
+      select: {
         time: true,
         meal: {
           select: {
             id: true,
             name: true,
+            calories: true,
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            fibers: true,
+            sodium: true,
             foods: {
               select: {
                 food: true,
                 quantity: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -42,7 +49,7 @@ export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
           data: {
             routineId,
             mealId,
-        
+
             time,
           },
         })
@@ -54,10 +61,10 @@ export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
             routineId_mealId_time: {
               routineId,
               mealId,
-              time
+              time,
             },
           },
-          data: {        
+          data: {
             time,
           },
         })
@@ -69,7 +76,7 @@ export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
             routineId_mealId_time: {
               routineId,
               mealId,
-              time
+              time,
             },
           },
         })
@@ -85,12 +92,12 @@ export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
       select: {
         meal: {
           select: {
-            totalCalories: true,
-            totalCarbohydrates: true,
-            totalProteins: true,
-            totalFats: true,
-            totalSodiums: true,
-            totalFibers: true,
+            calories: true,
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            fibers: true,
+            sodium: true,
           },
         },
       },

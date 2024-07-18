@@ -1,8 +1,8 @@
-import { MealWithFoods } from "./meal-interface";
+import { MealComplete } from "./meal-interface";
 
 export interface RoutineMeal {
   time: string;
-  meal: MealWithFoods;
+  meal: MealComplete;
 }
 
 export interface RoutineMealComplete {
