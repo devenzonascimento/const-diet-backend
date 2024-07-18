@@ -22,11 +22,26 @@ export const planRoutes = async (server: FastifyInstance) => {
       try {
         const { userId } = req.params;
 
-        const data = req.body;        
+        const data = req.body;
 
         const plan = await planUseCase.create({...data, userId});
 
         reply.code(201).send(plan);
+      } catch (error) {
+        reply.code(500).send(error);
+      }
+    }
+  );
+
+  server.get<{ Params: RequestParams; }>(
+    "/:planId",
+    async (req, reply) => {
+      try {
+        const { planId } = req.params;
+
+        const plan = await planUseCase.getPlanById(planId);
+
+        reply.code(200).send(plan);
       } catch (error) {
         reply.code(500).send(error);
       }

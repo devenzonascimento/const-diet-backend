@@ -7,8 +7,12 @@ export class PlanUseCase {
   constructor() {
     this.planRepository = new PlanRepositoryPrisma();
   }
-  async create(data: PlanCreate) {    
-    return await this.planRepository.create(data);
+  async create(planData: PlanCreate) {
+    return await this.planRepository.create(planData);
+  }
+
+  async getPlanById(planId: string) {
+    return await this.planRepository.getPlanById(planId);
   }
 
   async getAll(userId: string) {
