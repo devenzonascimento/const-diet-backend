@@ -1,4 +1,5 @@
 import { prisma } from "../database/prisma-client.js";
+import { MealFoodCreate, MealFoodUpdate } from "../interfaces/meal-food-interface.js";
 
 import {
   MealRepository,
@@ -8,11 +9,19 @@ import {
 } from "../interfaces/meal-interface.js";
 
 export class MealRepositoryPrisma implements MealRepository {
-  async create(data: MealCreate) {
+  async create(mealData: MealCreate, foodsData: MealFoodCreate[]) {
     return await prisma.meal.create({
       data: {
-        userId: data.userId,
-        name: data.name,
+        userId: mealData.userId,
+        name: mealData.name,
+        foods: {
+          createMany: {
+            data: foodsData.map((food) => ({
+              foodId: food.foodId,
+              quantity: food.quantity,            
+            })),
+          },
+        },
       },
     });
   }
@@ -25,6 +34,12 @@ export class MealRepositoryPrisma implements MealRepository {
       select: {
         id: true,
         name: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        fibers: true,
+        sodium: true,
         foods: {
           select: {
             food: true,
@@ -43,12 +58,12 @@ export class MealRepositoryPrisma implements MealRepository {
       select: {
         id: true,
         name: true,
-        totalCalories: true,
-        totalCarbohydrates: true,
-        totalProteins: true,
-        totalFats: true,
-        totalSodiums: true,
-        totalFibers: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        fibers: true,
+        sodium: true,
         foods: {
           select: {
             food: true,
@@ -59,13 +74,32 @@ export class MealRepositoryPrisma implements MealRepository {
     });
   }
 
-  async update(data: MealUpdate) {
+  async update(mealData: MealUpdate, foodsData: MealFoodUpdate) {
     return await prisma.meal.update({
       where: {
-        id: data.id,
+        id: mealData.id,
       },
       data: {
-        name: data.name,
+        name: mealData.name,
+        foods: {
+          createMany: {
+            data: foodsData.foodsToCreate.map((food) => ({
+              foodId: food.foodId,
+              quantity: food.quantity,            
+            })),
+          },
+          updateMany: foodsData.foodsToUpdate.map((food) => ({
+            where: {
+              foodId: food.foodId
+            },
+            data: {
+              quantity: food.quantity,
+            },
+          })),
+          deleteMany: foodsData.foodsToDelete.map((food) => ({
+            foodId: food.foodId,
+          })),
+        }
       },
     });
   }
@@ -85,15 +119,28 @@ export class MealRepositoryPrisma implements MealRepository {
     ]);
   }
 
-  async saveCalculatedFields(
-    mealId: string,
-    calculatedFields: CalculatedFields
-  ) {
-    await prisma.meal.update({
+  async saveCalculatedFields(mealId: string, calculatedFields: CalculatedFields) {
+    return await prisma.meal.update({
       where: {
         id: mealId,
       },
       data: calculatedFields,
+      select: {
+        id: true,
+        name: true,        
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        fibers: true,
+        sodium: true,
+        foods: {
+          select: {
+            food: true,
+            quantity: true,
+          },
+        },
+      }
     });
   }
 }

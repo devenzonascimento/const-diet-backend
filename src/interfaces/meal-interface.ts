@@ -15,9 +15,15 @@ export interface MealUpdate {
   name: string;
 }
 
-export interface MealWithFoods {
+export interface MealComplete {
   id: string;
   name: string;
+  calories: number;
+  carbohydrates: number;
+  proteins: number;
+  fats: number;
+  fibers: number;
+  sodium: number;
   foods: MealFood[];
 }
 
@@ -32,9 +38,9 @@ export interface CalculatedFields {
 
 export interface MealRepository {
   create: (mealData: MealCreate, foodsData: MealFoodCreate[]) => Promise<Meal>;
-  findById: (mealId: string) => Promise<MealWithFoods | null>;
-  getAll: (userId: string) => Promise<Meal[]>;
-  update: (mealData: MealUpdate, foodsData: MealFoodUpdate) => Promise<Meal | null>;
+  findById: (mealId: string) => Promise<MealComplete | null>;
+  getAll: (userId: string) => Promise<MealComplete[]>;
+  update: (mealData: MealUpdate, foodsData: MealFoodUpdate) => Promise<Meal>;
   delete: (mealId: string) => Promise<void>;
-  saveCalculatedFields: (mealId: string, calculatedFields: CalculatedFields) => void;
+  saveCalculatedFields: (mealId: string, calculatedFields: CalculatedFields) => Promise<MealComplete>;
 }
