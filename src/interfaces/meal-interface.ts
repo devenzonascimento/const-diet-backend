@@ -1,4 +1,4 @@
-import { MealFood } from "./meal-food-interface";
+import { MealFood, MealFoodCreate, MealFoodUpdate } from "./meal-food-interface";
 
 export interface Meal {
   id: string;
@@ -22,19 +22,19 @@ export interface MealWithFoods {
 }
 
 export interface CalculatedFields {
-  totalCalories: number;
-  totalCarbohydrates: number;
-  totalProteins: number;
-  totalFats: number;
-  totalSodiums: number;
-  totalFibers: number;
+  calories: number;
+  carbohydrates: number;
+  proteins: number;
+  fats: number;
+  fibers: number;
+  sodium: number;
 }
 
 export interface MealRepository {
-  create: (data: MealCreate) => Promise<Meal>;
+  create: (mealData: MealCreate, foodsData: MealFoodCreate[]) => Promise<Meal>;
   findById: (mealId: string) => Promise<MealWithFoods | null>;
   getAll: (userId: string) => Promise<Meal[]>;
-  update: (data: MealUpdate) => Promise<Meal | null>;
+  update: (mealData: MealUpdate, foodsData: MealFoodUpdate) => Promise<Meal | null>;
   delete: (mealId: string) => Promise<void>;
   saveCalculatedFields: (mealId: string, calculatedFields: CalculatedFields) => void;
 }

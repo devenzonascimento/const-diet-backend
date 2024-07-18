@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
-import { RoutineMeal, RoutineMealCreate } from "./routine-meal-interface";
 
+import { RoutineMeal, RoutineMealCreate } from "./routine-meal-interface";
 
 export interface Routine {
   id: string;
@@ -27,12 +27,12 @@ export interface RoutineComplete {
 }
 
 export interface CalculatedFields {
-  totalCalories: number;
-  totalCarbohydrates: number;
-  totalProteins: number;
-  totalFats: number;
-  totalSodiums: number;
-  totalFibers: number;
+  calories: number;
+  carbohydrates: number;
+  proteins: number;
+  fats: number;
+  fibers: number;
+  sodium: number;
 }
 
 export interface RoutineRepository {

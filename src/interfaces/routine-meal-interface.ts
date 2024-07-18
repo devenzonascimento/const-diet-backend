@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { MealWithFoods } from "./meal-interface";
 
 export interface RoutineMeal {
