@@ -45,7 +45,7 @@ export const routineRoutes = async (server: FastifyInstance) => {
 
       const routine = await routineUseCase.findById(routineId);
 
-      reply.send(routine);
+      reply.code(200).send(routine);
     } catch (error) {
       reply.code(500).send(error);
     }

@@ -23,6 +23,12 @@ export interface RoutineComplete {
   id: string;
   name: string;
   water: number;
+  calories: number;
+  carbohydrates: number;
+  proteins: number;
+  fats: number;
+  fibers: number;
+  sodium: number;
   meals: RoutineMeal[]
 }
 
@@ -42,4 +48,5 @@ export interface RoutineRepository {
   getAll: (userId: string) => Promise<Routine[]>
   update: (data: RoutineUpdate) => Promise<Routine | null>
   delete: (routineId: string) => Promise<void>
+  //saveCalculatedFields
 }

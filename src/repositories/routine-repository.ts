@@ -10,9 +10,11 @@ import {
 import { RoutineMealCreate } from "../interfaces/routine-meal-interface.js";
 
 export class RoutineRepositoryPrisma implements RoutineRepository {
-  async create(routineData: RoutineCreate, routineMealsData: RoutineMealCreate[]) {
-
-    const routineId = crypto.randomUUID()
+  async create(
+    routineData: RoutineCreate,
+    routineMealsData: RoutineMealCreate[]
+  ) {
+    const routineId = crypto.randomUUID();
 
     return await prisma.$transaction([
       prisma.routine.create({
@@ -27,10 +29,10 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         data: routineMealsData.map((meal) => ({
           routineId,
           mealId: meal.mealId,
-          time: meal.time,          
+          time: meal.time,
         })),
-      })
-    ])
+      }),
+    ]);
   }
 
   async findById(routineId: string) {
@@ -42,6 +44,12 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         id: true,
         name: true,
         water: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        fibers: true,
+        sodium: true,
         meals: {
           select: {
             time: true,
@@ -49,12 +57,12 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
               select: {
                 id: true,
                 name: true,
-                totalCalories: true,
-                totalCarbohydrates: true,
-                totalProteins: true,
-                totalFats: true,
-                totalSodiums: true,
-                totalFibers: true,
+                calories: true,
+                carbohydrates: true,
+                proteins: true,
+                fats: true,
+                fibers: true,
+                sodium: true,
                 foods: {
                   select: {
                     food: true,
@@ -78,12 +86,12 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         id: true,
         name: true,
         water: true,
-        totalCalories: true,
-        totalCarbohydrates: true,
-        totalProteins: true,
-        totalFats: true,
-        totalSodiums: true,
-        totalFibers: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        fibers: true,
+        sodium: true,
         meals: {
           select: {
             time: true,
@@ -91,12 +99,12 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
               select: {
                 id: true,
                 name: true,
-                totalCalories: true,
-                totalCarbohydrates: true,
-                totalProteins: true,
-                totalFats: true,
-                totalSodiums: true,
-                totalFibers: true,
+                calories: true,
+                carbohydrates: true,
+                proteins: true,
+                fats: true,
+                fibers: true,
+                sodium: true,
                 foods: {
                   select: {
                     food: true,
@@ -151,30 +159,30 @@ export class RoutineRepositoryPrisma implements RoutineRepository {
         id: true,
         name: true,
         water: true,
-        totalCalories: true,
-        totalCarbohydrates: true,
-        totalProteins: true,
-        totalFats: true,
-        totalSodiums: true,
-        totalFibers: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        fibers: true,
+        sodium: true,
         meals: {
-          select: {            
+          select: {
             time: true,
             meal: {
               select: {
                 id: true,
                 name: true,
-                totalCalories: true,
-                totalCarbohydrates: true,
-                totalProteins: true,
-                totalFats: true,
-                totalSodiums: true,
-                totalFibers: true,
+                calories: true,
+                carbohydrates: true,
+                proteins: true,
+                fats: true,
+                fibers: true,
+                sodium: true,
               },
             },
           },
         },
-      }
+      },
     });
   }
 }
