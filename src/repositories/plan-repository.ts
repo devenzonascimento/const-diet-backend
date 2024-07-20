@@ -28,24 +28,66 @@ export class PlanRepositoryPrisma implements PlanRepository {
       where: {
         id: planId,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        goal: true,
+        startDate: true,
+        endDate: true,
         routines: {
-          include: {
+          select: {
+            date: true,
+            status: true,
             routine: {
-              include: {
+              select: {
+                id: true,
+                name: true,
+                water: true,
+                calories: true,
+                carbohydrates: true,
+                proteins: true,
+                fats: true,
+                fibers: true,
+                sodium: true,
                 meals: {
-                  include: {
+                  select: {
+                    time: true,
                     meal: {
-                      include: {
-                        foods: true,
+                      select: {
+                        id: true,
+                        name: true,
+                        calories: true,
+                        carbohydrates: true,
+                        proteins: true,
+                        fats: true,
+                        fibers: true,
+                        sodium: true,
+                        foods: {
+                          select: {
+                            quantity: true,
+                            food: {
+                              select: {
+                                id: true,
+                                name: true,
+                                unit: true,
+                                calories: true,
+                                carbohydrates: true,
+                                proteins: true,
+                                fats: true,
+                                fibers: true,
+                                sodium: true,
+                              },
+                            },
+                          },
+                        },
                       },
-                    }
-                  },
-                },
-              },
+                    },
+                  }
+                }
+              }
             }
-          },
-        },
+          }
+        }
       },
     });
   }
