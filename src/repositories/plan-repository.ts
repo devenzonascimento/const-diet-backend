@@ -1,5 +1,6 @@
 import { prisma } from "../database/prisma-client.js";
-import { PlanCreate, PlanRepository } from "../interfaces/plan-interface.js";
+
+import { PlanCreate, PlanRepository, PlanUpdate } from "../interfaces/plan-interface.js";
 
 export class PlanRepositoryPrisma implements PlanRepository {
   async create(planData: PlanCreate) {
@@ -19,6 +20,32 @@ export class PlanRepositoryPrisma implements PlanRepository {
             })),
           },
         },
+      },
+    });
+  }
+
+  async update(planData: PlanUpdate) {
+    return await prisma.plan.update({
+      where: {
+        id: planData.id,
+      },
+      data: {
+        name: planData.name,
+        goal: planData.goal,
+        startDate: planData.startDate,
+        endDate: planData.endDate,
+        routines: {
+          deleteMany: {
+            planId: planData.id
+          },
+          createMany: {
+            data: planData.routines.map((routine) => ({
+              routineId: routine.routineId,
+              date: routine.date,
+              status: "PENDING",
+            })),
+          },
+        }
       },
     });
   }

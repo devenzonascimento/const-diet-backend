@@ -1,4 +1,4 @@
-import { PlanCreate } from "../interfaces/plan-interface.js";
+import { PlanCreate, PlanUpdate } from "../interfaces/plan-interface.js";
 import { PlanRepositoryPrisma } from "../repositories/plan-repository.js";
 
 export class PlanUseCase {
@@ -9,6 +9,10 @@ export class PlanUseCase {
   }
   async create(planData: PlanCreate) {
     return await this.planRepository.create(planData);
+  }
+
+  async update(planData: PlanUpdate) {
+    return await this.planRepository.update(planData);
   }
 
   async getPlanById(planId: string) {

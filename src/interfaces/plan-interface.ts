@@ -18,8 +18,21 @@ export interface PlanCreate {
   }[];
 }
 
+export interface PlanUpdate {
+  id: string;
+  name: string;
+  goal: string;
+  startDate: Date;
+  endDate: Date;
+  routines: {
+    routineId: string;
+    date: Date;
+  }[];
+}
+
 export interface PlanRepository {
-  create: (planData: PlanCreate) => Promise<Plan | null>;
+  create: (planData: PlanCreate) => Promise<Plan>;
+  update: (planData: PlanUpdate) => Promise<Plan>;
   getPlanById: (planId: string) => Promise<Plan | null>;
   getAll: (userId: string) => Promise<Plan[]>;
 }
