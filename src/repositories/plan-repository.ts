@@ -21,10 +21,17 @@ export class PlanRepositoryPrisma implements PlanRepository {
           },
         },
       },
+      select: {
+        id: true,
+        name: true,
+        goal: true,
+        startDate: true,
+        endDate: true,
+      },
     });
   }
 
-  async update(planData: PlanUpdate) {
+  async update(planData: PlanUpdate) {    
     return await prisma.plan.update({
       where: {
         id: planData.id,
@@ -45,6 +52,67 @@ export class PlanRepositoryPrisma implements PlanRepository {
               status: "PENDING",
             })),
           },
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        goal: true,
+        startDate: true,
+        endDate: true,
+        routines: {
+          select: {
+            date: true,
+            status: true,
+            routine: {
+              select: {
+                id: true,
+                name: true,
+                water: true,
+                calories: true,
+                carbohydrates: true,
+                proteins: true,
+                fats: true,
+                fibers: true,
+                sodium: true,
+                meals: {
+                  select: {
+                    time: true,
+                    meal: {
+                      select: {
+                        id: true,
+                        name: true,
+                        calories: true,
+                        carbohydrates: true,
+                        proteins: true,
+                        fats: true,
+                        fibers: true,
+                        sodium: true,
+                        foods: {
+                          select: {
+                            quantity: true,
+                            food: {
+                              select: {
+                                id: true,
+                                name: true,
+                                unit: true,
+                                calories: true,
+                                carbohydrates: true,
+                                proteins: true,
+                                fats: true,
+                                fibers: true,
+                                sodium: true,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  }
+                }
+              }
+            }
+          }
         }
       },
     });
