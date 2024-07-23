@@ -99,4 +99,8 @@ export class PlanUseCase {
   async getAll(userId: string) {
     return await this.planRepository.getAll(userId);
   }
+
+  async delete(planId: string) {
+    await this.planRepository.delete(planId)
+  }
 }

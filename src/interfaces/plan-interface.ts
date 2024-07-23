@@ -35,4 +35,5 @@ export interface PlanRepository {
   update: (planData: PlanUpdate) => Promise<Plan>;
   getPlanById: (planId: string) => Promise<Plan | null>;
   getAll: (userId: string) => Promise<Plan[]>;
+  delete: (planId: string) => Promise<void>;
 }

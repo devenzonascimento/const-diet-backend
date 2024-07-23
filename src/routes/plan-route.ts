@@ -73,4 +73,16 @@ export const planRoutes = async (server: FastifyInstance) => {
       reply.code(500).send(error);
     }
   });
+
+  server.delete<{ Params: RequestParams }>("/:planId", async (req, reply) => {
+    try {
+      const { planId } = req.params;
+
+      await planUseCase.delete(planId);
+
+      reply.code(204).send();
+    } catch (error) {
+      reply.code(500).send(error);
+    }
+  });
 };

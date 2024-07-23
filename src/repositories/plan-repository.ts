@@ -201,4 +201,19 @@ export class PlanRepositoryPrisma implements PlanRepository {
       },
     });
   }
+
+  async delete(planId: string) {
+    await prisma.$transaction([
+      prisma.dailyRoutine.deleteMany({
+        where: {
+          planId,
+        }
+      }),
+      prisma.plan.delete({
+        where: {
+          id: planId,        
+        }
+      })
+    ])
+  }
 }
