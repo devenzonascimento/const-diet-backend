@@ -7,6 +7,7 @@ import { foodRoutes } from "./routes/food-route";
 import { mealRoutes } from "./routes/meal-route";
 import { routineRoutes } from "./routes/routine-route";
 import { planRoutes } from "./routes/plan-route";
+import { dailyRoutineRoutes } from "./routes/daily-routine-route";
 
 const server: FastifyInstance = fastify();
 
@@ -42,4 +43,10 @@ server.register(planRoutes, {
   prefix: "users/:userId/plans",
 });
 
+server.register(dailyRoutineRoutes, {
+  prefix: "users/:userId/daily-routines",
+});
+
 server.listen({ port: 3333 }, () => console.log("SERVIDOR ONLINE"));
+
+//TODO: implementar uma logica pra quando houver update em foods ou meals refazer os campos autocalculados
