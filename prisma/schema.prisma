@@ -41,6 +41,7 @@ model DailyRoutine {
   id        String   @id @default(uuid())
   date      DateTime
   status    Status   @default(PENDING)
+  mealsStatus Json?  
   planId    String
   plan      Plan     @relation(fields: [planId], references: [id])
   routineId String
