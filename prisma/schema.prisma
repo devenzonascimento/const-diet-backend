@@ -31,6 +31,7 @@ model Plan {
   goal      String
   startDate DateTime
   endDate   DateTime
+  isActive  Boolean        @default(false)
   userId    String
   user      User           @relation(fields: [userId], references: [id])
   routines  DailyRoutine[]
