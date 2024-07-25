@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "seed": "tsx --env-file .env prisma/seeds/seed-of-routines.ts",
+    "seed": "tsx --env-file .env prisma/seeds/index.ts",
     "dev": "tsx watch --env-file .env src/server.ts",
     "build": "tsup src"
   },
