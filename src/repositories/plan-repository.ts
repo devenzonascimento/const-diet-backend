@@ -1,10 +1,15 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../database/prisma-client.js";
 
-import { PlanCreate, PlanRepository, PlanUpdate } from "../interfaces/plan-interface.js";
+import {
+  PlanCreate,
+  PlanRepository,
+  PlanUpdate,
+} from "../interfaces/plan-interface.js";
 
 export class PlanRepositoryPrisma implements PlanRepository {
   async create(planData: PlanCreate) {
-    return await prisma.plan.create({
+    const { routines, ...plan } = await prisma.plan.create({
       data: {
         name: planData.name,
         goal: planData.goal,
@@ -27,11 +32,41 @@ export class PlanRepositoryPrisma implements PlanRepository {
         goal: true,
         startDate: true,
         endDate: true,
+        routines: {
+          select: {
+            id: true,
+            routine: {
+              select: {
+                meals: {
+                  select: {
+                    mealId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
+
+    for (const { id, routine } of routines) {
+      const mealsStatus = routine.meals.map(({ mealId }) => {
+        return {
+          mealId: mealId,
+          status: "PENDING",
+        };
+      }) as Prisma.JsonArray;
+      
+      await prisma.dailyRoutine.update({
+        where: { id },
+        data: { mealsStatus },
+      });
+    }
+
+    return plan;
   }
 
-  async update(planData: PlanUpdate) {    
+  async update(planData: PlanUpdate) {
     return await prisma.plan.update({
       where: {
         id: planData.id,
@@ -43,7 +78,7 @@ export class PlanRepositoryPrisma implements PlanRepository {
         endDate: planData.endDate,
         routines: {
           deleteMany: {
-            planId: planData.id
+            planId: planData.id,
           },
           createMany: {
             data: planData.routines.map((routine) => ({
@@ -52,7 +87,7 @@ export class PlanRepositoryPrisma implements PlanRepository {
               status: "PENDING",
             })),
           },
-        }
+        },
       },
       select: {
         id: true,
@@ -108,12 +143,12 @@ export class PlanRepositoryPrisma implements PlanRepository {
                         },
                       },
                     },
-                  }
-                }
-              }
-            }
-          }
-        }
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -177,12 +212,12 @@ export class PlanRepositoryPrisma implements PlanRepository {
                         },
                       },
                     },
-                  }
-                }
-              }
-            }
-          }
-        }
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -207,13 +242,13 @@ export class PlanRepositoryPrisma implements PlanRepository {
       prisma.dailyRoutine.deleteMany({
         where: {
           planId,
-        }
+        },
       }),
       prisma.plan.delete({
         where: {
-          id: planId,        
-        }
-      })
-    ])
+          id: planId,
+        },
+      }),
+    ]);
   }
 }
