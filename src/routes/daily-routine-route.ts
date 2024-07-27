@@ -6,6 +6,8 @@ import { DailyRoutineUseCase } from "../usecases/daily-routine-usecase.js";
 
 import { $Enums } from "@prisma/client";
 
+import { MealStatus } from "../interfaces/daily-routine-interface.js";
+
 interface RequestParams {
   userId: string;
   dailyRoutineId: string;
@@ -20,6 +22,19 @@ export const dailyRoutineRoutes = async (server: FastifyInstance) => {
 
   server.addHook("preHandler", authMiddleware);
 
+  server.get<{ Params: RequestParams; Body: RequestBody }>(
+    "/",
+    async (_, reply) => {
+      try {
+        const dailyRoutine = await dailyRoutineUseCase.getDailyRoutine();
+        
+        reply.code(200).send(dailyRoutine);
+      } catch (error) {
+        reply.code(500).send(error);
+      }
+    }
+  );
+
   server.patch<{ Params: RequestParams; Body: RequestBody }>(
     "/:dailyRoutineId",
     async (req, reply) => {
@@ -29,6 +44,25 @@ export const dailyRoutineRoutes = async (server: FastifyInstance) => {
         const { status } = req.body;
 
         await dailyRoutineUseCase.setStatus(dailyRoutineId, status);
+
+        reply.code(200).send();
+      } catch (error) {
+        reply.code(500).send(error);
+      }
+    }
+  );
+
+  server.patch<{ Params: RequestParams; Body: MealStatus }>(
+    "/:dailyRoutineId/meals-status",
+    async (req, reply) => {
+      try {
+        const { dailyRoutineId } = req.params;
+
+        const data = req.body;
+
+        console.log("recebi isso:", data)
+
+        await dailyRoutineUseCase.setMealStatus(dailyRoutineId, data);
 
         reply.code(200).send();
       } catch (error) {
