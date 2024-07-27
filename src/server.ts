@@ -47,6 +47,16 @@ server.register(dailyRoutineRoutes, {
   prefix: "users/:userId/daily-routines",
 });
 
-server.listen({ port: 3333 }, () => console.log("SERVIDOR ONLINE"));
+const start = async () => {
+  try {
+    await server.listen({ port: 3333, host: '0.0.0.0' });
+    console.log(`🔥 Server is running on http://192.168.0.109:3333 🔥`);
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+};
+
+start();
 
 //TODO: implementar uma logica pra quando houver update em foods ou meals refazer os campos autocalculados
