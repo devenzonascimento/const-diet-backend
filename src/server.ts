@@ -49,7 +49,7 @@ server.register(dailyRoutineRoutes, {
 
 const start = async () => {
   try {
-    await server.listen({ port: 3333, host: '0.0.0.0' });
+    await server.listen({ port: 3333, host: "0.0.0.0" });
     console.log(`🔥 Server is running on http://192.168.0.109:3333 🔥`);
   } catch (err) {
     server.log.error(err);
@@ -58,5 +58,3 @@ const start = async () => {
 };
 
 start();
-
-//TODO: implementar uma logica pra quando houver update em foods ou meals refazer os campos autocalculados
