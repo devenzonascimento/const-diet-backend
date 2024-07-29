@@ -59,9 +59,7 @@ export const dailyRoutineRoutes = async (server: FastifyInstance) => {
         const { dailyRoutineId } = req.params;
 
         const data = req.body;
-
-        console.log("recebi isso:", data)
-
+        
         await dailyRoutineUseCase.setMealStatus(dailyRoutineId, data);
 
         reply.code(200).send();

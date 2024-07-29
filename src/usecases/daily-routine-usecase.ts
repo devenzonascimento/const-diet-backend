@@ -40,9 +40,7 @@ export class DailyRoutineUseCase {
     });
 
     const allCompleted = updatedMealsStatus.every(meal => meal.status === 'COMPLETED');
-    console.log(dailyRoutineId,)
-    console.log(allCompleted ? "COMPLETED" : "PENDING",)
-    console.log(updatedMealsStatus)
+
     await this.dailyRoutineRepository.setMealStatus(
       dailyRoutineId,
       allCompleted ? "COMPLETED" : "PENDING",

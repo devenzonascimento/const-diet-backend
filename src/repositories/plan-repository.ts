@@ -40,6 +40,7 @@ export class PlanRepositoryPrisma implements PlanRepository {
                 meals: {
                   select: {
                     mealId: true,
+                    time: true,
                   },
                 },
               },
@@ -50,9 +51,10 @@ export class PlanRepositoryPrisma implements PlanRepository {
     });
 
     for (const { id, routine } of routines) {
-      const mealsStatus = routine.meals.map(({ mealId }) => {
+      const mealsStatus = routine.meals.map(({ mealId, time }) => {
         return {
-          mealId: mealId,
+          mealId,
+          time,          
           status: "PENDING",
         };
       }) as Prisma.JsonArray;
