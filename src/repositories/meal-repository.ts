@@ -104,9 +104,14 @@ export class MealRepositoryPrisma implements MealRepository {
     });
   }
 
-  async delete(mealId: string) {
+  async delete(mealId: string) {    
     await prisma.$transaction([
       prisma.mealFood.deleteMany({
+        where: {
+          mealId,
+        },
+      }),
+      prisma.routineMeal.deleteMany({
         where: {
           mealId,
         },
