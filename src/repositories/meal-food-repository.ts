@@ -34,4 +34,15 @@ export class MealFoodRepositoryPrisma implements MealFoodRepository {
       },
     });
   }
+
+  async getMealsIdsRelatedToFood(foodId: string) {
+    return await prisma.mealFood.findMany({
+      where: {
+        foodId,
+      },
+      select: {
+        mealId: true,
+      },
+    })
+  }
 }

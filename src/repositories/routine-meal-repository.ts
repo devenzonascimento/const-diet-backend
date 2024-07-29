@@ -32,4 +32,15 @@ export class RoutineMealRepositoryPrisma implements RoutineMealRepository {
       },
     });
   }
+
+  async getRoutineIdsRelatedToMeal(mealId: string) {
+    return await prisma.routineMeal.findMany({
+      where: {
+        mealId,
+      },
+      select: {
+        routineId: true,
+      },
+    })
+  }
 }
