@@ -52,10 +52,10 @@ export class FoodRepositoryPrisma implements FoodRepository {
   }
 
   async getAll(userId: string) {
-    return await prisma.food.findMany({ 
-      where: { 
-        userId
-      }
+    return await prisma.food.findMany({
+      where: {
+        userId,
+      },
     });
   }
 
@@ -78,10 +78,17 @@ export class FoodRepositoryPrisma implements FoodRepository {
   }
 
   async delete(foodId: string) {
-    await prisma.food.delete({
-      where: {
-        id: foodId,
-      },
-    });
+    await prisma.$transaction([
+      prisma.mealFood.deleteMany({
+        where: {
+          foodId,
+        },
+      }),
+      prisma.food.delete({
+        where: {
+          id: foodId,
+        },
+      }),
+    ]);
   }
 }
