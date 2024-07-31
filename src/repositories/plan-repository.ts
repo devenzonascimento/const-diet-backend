@@ -54,11 +54,11 @@ export class PlanRepositoryPrisma implements PlanRepository {
       const mealsStatus = routine.meals.map(({ mealId, time }) => {
         return {
           mealId,
-          time,          
+          time,
           status: "PENDING",
         };
       }) as Prisma.JsonArray;
-      
+
       await prisma.dailyRoutine.update({
         where: { id },
         data: { mealsStatus },
@@ -252,5 +252,79 @@ export class PlanRepositoryPrisma implements PlanRepository {
         },
       }),
     ]);
+  }
+
+  async setActivePlan(userId: string, newActivePlanId: string) {
+    const oldActivePlan = await prisma.plan.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!oldActivePlan) {
+      return await prisma.plan.update({
+        where: {
+          id: newActivePlanId,
+        },
+        data: {
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          goal: true,
+          startDate: true,
+          endDate: true,
+        },
+      });
+    }
+
+    const [_, activePlan] = await prisma.$transaction([
+      prisma.plan.update({
+        where: {
+          id: oldActivePlan.id,
+        },
+        data: {
+          isActive: false,
+        },
+      }),
+      prisma.plan.update({
+        where: {
+          id: newActivePlanId,
+        },
+        data: {
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          goal: true,
+          startDate: true,
+          endDate: true,
+        },
+      }),
+    ]);
+
+    return activePlan;
+  }
+
+  async getActivePlan(userId: string) {
+    return await prisma.plan.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        goal: true,
+        startDate: true,
+        endDate: true,
+      },
+    });
   }
 }

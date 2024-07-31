@@ -101,6 +101,14 @@ export class PlanUseCase {
   }
 
   async delete(planId: string) {
-    await this.planRepository.delete(planId)
+    await this.planRepository.delete(planId);
+  }
+
+  async setActivePlan(userId: string, newActivePlanId: string) {
+    return await this.planRepository.setActivePlan(userId, newActivePlanId);
+  }
+
+  async getActivePlan(userId: string) {
+    return await this.planRepository.getActivePlan(userId);
   }
 }

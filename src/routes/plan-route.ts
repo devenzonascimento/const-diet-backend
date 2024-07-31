@@ -85,4 +85,31 @@ export const planRoutes = async (server: FastifyInstance) => {
       reply.code(500).send(error);
     }
   });
+
+  server.patch<{ Params: RequestParams }>(
+    "/:planId/active",
+    async (req, reply) => {
+      try {
+        const { userId, planId } = req.params;
+
+        const plan = await planUseCase.setActivePlan(userId, planId);
+
+        reply.code(200).send(plan);
+      } catch (error) {
+        reply.code(500).send(error);
+      }
+    }
+  );
+
+  server.get<{ Params: RequestParams }>("/active", async (req, reply) => {
+    try {
+      const { userId } = req.params;
+
+      const plan = await planUseCase.getActivePlan(userId);
+
+      reply.code(200).send(plan);
+    } catch (error) {
+      reply.code(500).send(error);
+    }
+  });
 };
