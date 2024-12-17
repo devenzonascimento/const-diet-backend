@@ -1,21 +1,25 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from 'fastify'
+import { UserUseCase } from '@/usecases/user-usecase.js'
 
-import { UserUseCase } from "../usecases/user-usecase.js";
-
-export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
+export const authMiddleware = async (
+  req: FastifyRequest,
+  reply: FastifyReply,
+) => {
   const userUseCase = new UserUseCase()
-
-  const token = req.headers.authorization?.replace(/^Bearer /, "") as string;
+  const token = req.headers.authorization?.replace(/^Bearer /, '') as string
 
   if (!token) {
-    reply.code(401).send({ message: "Unauthorized: token missing." });
+    return reply.code(401).send({ message: 'Unauthorized: token missing.' })
   }
 
-  const user = await userUseCase.verifyToken(token);
- 
+  const user = await userUseCase.verifyToken(token)
+
   if (!user) {
-    reply.code(401).send({ message: "Unauthorized: invalid token." });
+    return reply.code(401).send({ message: 'Unauthorized: invalid token.' })
   }
 
-  return;
-};
+  // Armazena os dados do usuário no objeto de requisição
+  req.user = user
+
+  return
+}
