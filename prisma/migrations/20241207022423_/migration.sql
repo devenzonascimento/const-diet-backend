@@ -6,7 +6,7 @@ CREATE TYPE "Unit" AS ENUM ('GRAMS', 'MILILITERS');
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -23,13 +23,13 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Plan" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "goal" TEXT NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT false,
-    "userId" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
 );
@@ -40,15 +40,15 @@ CREATE TABLE "DailyRoutine" (
     "date" TIMESTAMP(3) NOT NULL,
     "status" "Status" NOT NULL DEFAULT 'PENDING',
     "mealsStatus" JSONB,
-    "planId" TEXT NOT NULL,
-    "routineId" TEXT NOT NULL,
+    "planId" INTEGER NOT NULL,
+    "routineId" INTEGER NOT NULL,
 
     CONSTRAINT "DailyRoutine_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Routine" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "water" INTEGER NOT NULL DEFAULT 0,
     "calories" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -58,15 +58,15 @@ CREATE TABLE "Routine" (
     "fibers" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "sodium" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
-    "userId" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Routine_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "RoutineMeal" (
-    "routineId" TEXT NOT NULL,
-    "mealId" TEXT NOT NULL,
+    "routineId" INTEGER NOT NULL,
+    "mealId" INTEGER NOT NULL,
     "time" TEXT NOT NULL,
 
     CONSTRAINT "RoutineMeal_pkey" PRIMARY KEY ("routineId","mealId","time")
@@ -74,7 +74,7 @@ CREATE TABLE "RoutineMeal" (
 
 -- CreateTable
 CREATE TABLE "Meal" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "calories" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "carbohydrates" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -83,15 +83,15 @@ CREATE TABLE "Meal" (
     "fibers" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "sodium" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
-    "userId" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Meal_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "MealFood" (
-    "mealId" TEXT NOT NULL,
-    "foodId" TEXT NOT NULL,
+    "mealId" INTEGER NOT NULL,
+    "foodId" INTEGER NOT NULL,
     "quantity" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "MealFood_pkey" PRIMARY KEY ("mealId","foodId")
@@ -99,7 +99,7 @@ CREATE TABLE "MealFood" (
 
 -- CreateTable
 CREATE TABLE "Food" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "unit" "Unit" NOT NULL DEFAULT 'GRAMS',
     "calories" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -109,7 +109,7 @@ CREATE TABLE "Food" (
     "fibers" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "sodium" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
-    "userId" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Food_pkey" PRIMARY KEY ("id")
 );

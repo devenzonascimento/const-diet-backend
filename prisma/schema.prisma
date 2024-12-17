@@ -3,12 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            Int       @id @default(autoincrement())
   email         String    @unique
   password      String
   name          String
@@ -21,20 +22,20 @@ model User {
   updatedAt     DateTime  @updatedAt
   foods         Food[]
   meals         Meal[]
-  routines      Routine[]
   plans         Plan[]
+  routines      Routine[]
 }
 
 model Plan {
-  id        String         @id @default(uuid())
+  id        Int            @id @default(autoincrement())
   name      String
   goal      String
   startDate DateTime
   endDate   DateTime
   isActive  Boolean        @default(false)
-  userId    String
-  user      User           @relation(fields: [userId], references: [id])
+  userId    Int
   routines  DailyRoutine[]
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DailyRoutine {
@@ -42,14 +43,14 @@ model DailyRoutine {
   date        DateTime
   status      Status   @default(PENDING)
   mealsStatus Json?
-  planId      String
-  plan        Plan     @relation(fields: [planId], references: [id])
-  routineId   String
-  routine     Routine  @relation(fields: [routineId], references: [id])
+  planId      Int
+  routineId   Int
+  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  routine     Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
 }
 
 model Routine {
-  id            String         @id @default(uuid())
+  id            Int            @id @default(autoincrement())
   name          String
   water         Int            @default(0)
   calories      Float          @default(0)
@@ -59,24 +60,24 @@ model Routine {
   fibers        Float          @default(0)
   sodium        Float          @default(0)
   isDeleted     Boolean        @default(false)
-  userId        String
-  User          User           @relation(fields: [userId], references: [id])
-  meals         RoutineMeal[]
+  userId        Int
   DailyRoutine  DailyRoutine[]
+  User          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meals         RoutineMeal[]
 }
 
 model RoutineMeal {
-  routineId String
-  mealId    String
+  routineId Int
+  mealId    Int
   time      String
-  routine   Routine @relation(fields: [routineId], references: [id])
-  meal      Meal    @relation(fields: [mealId], references: [id])
+  meal      Meal    @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  routine   Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
 
   @@id([routineId, mealId, time])
 }
 
 model Meal {
-  id            String        @id @default(uuid())
+  id            Int           @id @default(autoincrement())
   name          String
   calories      Float         @default(0)
   carbohydrates Float         @default(0)
@@ -85,24 +86,24 @@ model Meal {
   fibers        Float         @default(0)
   sodium        Float         @default(0)
   isDeleted     Boolean       @default(false)
-  userId        String
-  User          User          @relation(fields: [userId], references: [id])
-  routines      RoutineMeal[]
+  userId        Int
+  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   foods         MealFood[]
+  routines      RoutineMeal[]
 }
 
 model MealFood {
-  mealId   String
-  foodId   String
+  mealId   Int
+  foodId   Int
   quantity Float
-  meal     Meal   @relation(fields: [mealId], references: [id])
-  food     Food   @relation(fields: [foodId], references: [id])
+  food     Food  @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  meal     Meal  @relation(fields: [mealId], references: [id], onDelete: Cascade)
 
   @@id([mealId, foodId])
 }
 
 model Food {
-  id            String     @id @default(uuid())
+  id            Int        @id @default(autoincrement())
   name          String
   unit          Unit       @default(GRAMS)
   calories      Float      @default(0)
@@ -112,8 +113,8 @@ model Food {
   fibers        Float      @default(0)
   sodium        Float      @default(0)
   isDeleted     Boolean    @default(false)
-  userId        String
-  User          User       @relation(fields: [userId], references: [id])
+  userId        Int
+  User          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   meals         MealFood[]
 }
 
