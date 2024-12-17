@@ -1,13 +1,13 @@
-import { prisma } from "../database/prisma-client.js";
+import { prisma } from '@/database/prisma-client.js'
 
-import {
-  UserRepository,
+import type {
+  IUserRepository,
   UserCreate,
   UserUpdate,
   UserStats,
-} from "../interfaces/user-interface.js";
+} from '@/interfaces/user-interface.js'
 
-export class UserRepositoryPrisma implements UserRepository {
+export class UserRepository implements IUserRepository {
   async create(data: UserCreate) {
     return await prisma.user.create({
       data: {
@@ -15,10 +15,10 @@ export class UserRepositoryPrisma implements UserRepository {
         email: data.email,
         password: data.password,
       },
-    });
+    })
   }
 
-  async addStats(userId: string, data: UserStats) {
+  async addStats(userId: number, data: UserStats) {
     return await prisma.user.update({
       where: {
         id: userId,
@@ -30,7 +30,7 @@ export class UserRepositoryPrisma implements UserRepository {
         sex: data.sex,
         activityLevel: data.activityLevel,
       },
-    });
+    })
   }
 
   async findByEmail(email: string) {
@@ -38,10 +38,10 @@ export class UserRepositoryPrisma implements UserRepository {
       where: {
         email: email,
       },
-    });
+    })
   }
 
-  async update(userId: string, data: UserUpdate) {
+  async update(userId: number, data: UserUpdate) {
     return await prisma.user.update({
       where: {
         id: userId,
@@ -56,14 +56,14 @@ export class UserRepositoryPrisma implements UserRepository {
         sex: data.sex,
         activityLevel: data.activityLevel,
       },
-    });
+    })
   }
 
-  async delete(userId: string) {
+  async delete(userId: number) {
     await prisma.user.delete({
       where: {
         id: userId,
       },
-    });
+    })
   }
 }
