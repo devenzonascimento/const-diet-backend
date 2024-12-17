@@ -1,46 +1,40 @@
-import { $Enums } from "@prisma/client";
+import type { $Enums } from '@prisma/client'
 
-export interface Food {
-  id: string;
-  name: string;
+export type Food = {
+  id: number
+  name: string
   unit: $Enums.Unit
-  calories: number;
-  carbohydrates: number;
-  proteins: number;
-  fats: number;
-  sodium: number;
-  fibers: number;
+  calories: number
+  carbohydrates: number
+  proteins: number
+  fats: number
+  sodium: number
+  fibers: number
 }
 
-export interface FoodCreate {
-  userId: string;
-  name: string;
-  unit: $Enums.Unit
-  calories: number;
-  carbohydrates: number;
-  proteins: number;
-  fats: number;
-  sodium: number;
-  fibers: number;
+export type FoodCreate = Food & {
+  userId: number
 }
 
-export interface FoodUpdate {
-  id: string;
-  name: string;
-  unit: $Enums.Unit
-  calories: number;
-  carbohydrates: number;
-  proteins: number;
-  fats: number;
-  sodium: number;
-  fibers: number;
+export type FoodUpdate = Food
+
+export type PaginationResponse<T> = {
+  itens: T[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
 }
 
-export interface FoodRepository {
-  create(foodData: FoodCreate): Promise<Food>;
-  findById(foodId: string): Promise<Food | null>;
-  findByName(userId: string, foodName: string): Promise<Food | null>;
-  getAll(foodId: string): Promise<Food[]>;
-  update(foodData: FoodUpdate): Promise<Food>;
-  delete(foodId: string): Promise<void>;
+export interface IFoodRepository {
+  create(foodData: FoodCreate): Promise<Food>
+  findById(foodId: number): Promise<Food | null>
+  findByName(userId: number, foodName: string): Promise<Food | null>
+  getAll(userId: number): Promise<Food[]>
+  getAllWithPagination(
+    userId: number,
+    page: number,
+    pageSize: number,
+  ): Promise<PaginationResponse<Food>>
+  update(foodData: FoodUpdate): Promise<Food>
+  delete(foodId: number): Promise<void>
 }

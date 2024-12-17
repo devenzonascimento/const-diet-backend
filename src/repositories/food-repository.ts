@@ -1,12 +1,12 @@
-import { prisma } from "../database/prisma-client.js";
+import { prisma } from '@/database/prisma-client.js'
 
-import {
-  FoodRepository,
+import type {
+  IFoodRepository,
   FoodCreate,
   FoodUpdate,
-} from "../interfaces/food-interface.js";
+} from '@/interfaces/food-interface.js'
 
-export class FoodRepositoryPrisma implements FoodRepository {
+export class FoodRepository implements IFoodRepository {
   async create(foodData: FoodCreate) {
     return await prisma.food.create({
       data: {
@@ -20,10 +20,21 @@ export class FoodRepositoryPrisma implements FoodRepository {
         sodium: foodData.sodium,
         fibers: foodData.fibers,
       },
-    });
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        sodium: true,
+        fibers: true,
+      },
+    })
   }
 
-  async findById(foodId: string) {
+  async findById(foodId: number) {
     return await prisma.food.findFirst({
       where: {
         id: foodId,
@@ -39,24 +50,82 @@ export class FoodRepositoryPrisma implements FoodRepository {
         sodium: true,
         fibers: true,
       },
-    });
+    })
   }
 
-  async findByName(userId: string, foodName: string) {
+  async findByName(userId: number, foodName: string) {
     return await prisma.food.findFirst({
       where: {
         userId,
         name: foodName,
       },
-    });
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        sodium: true,
+        fibers: true,
+      },
+    })
   }
 
-  async getAll(userId: string) {
+  async getAll(userId: number) {
     return await prisma.food.findMany({
       where: {
         userId,
       },
-    });
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        sodium: true,
+        fibers: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    })
+  }
+
+  async getAllWithPagination(userId: number, page: number, pageSize: number) {
+    const foods = await prisma.food.findMany({
+      where: {
+        userId,
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        sodium: true,
+        fibers: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    })
+
+    const totalCount = await prisma.food.count()
+
+    return {
+      itens: foods,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
+    }
   }
 
   async update(foodData: FoodUpdate) {
@@ -74,21 +143,25 @@ export class FoodRepositoryPrisma implements FoodRepository {
         sodium: foodData.sodium,
         fibers: foodData.fibers,
       },
-    });
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        calories: true,
+        carbohydrates: true,
+        proteins: true,
+        fats: true,
+        sodium: true,
+        fibers: true,
+      },
+    })
   }
 
-  async delete(foodId: string) {
-    await prisma.$transaction([
-      prisma.mealFood.deleteMany({
-        where: {
-          foodId,
-        },
-      }),
-      prisma.food.delete({
-        where: {
-          id: foodId,
-        },
-      }),
-    ]);
+  async delete(foodId: number) {
+    await prisma.food.delete({
+      where: {
+        id: foodId,
+      },
+    })
   }
 }

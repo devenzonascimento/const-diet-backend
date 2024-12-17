@@ -1,61 +1,61 @@
-import { UserRepositoryPrisma } from "../repositories/user-repository.js";
-
-import jwt from "jsonwebtoken";
-import { compareSync, hashSync } from "bcrypt";
-
-import {
+import jwt from 'jsonwebtoken'
+import { compareSync, hashSync } from 'bcrypt'
+import { UserRepository } from '@/repositories/user-repository.js'
+import type {
   UserCreate,
-  UserUpdate,
   UserLogin,
-  UserStats,
   User,
-} from "../interfaces/user-interface.js";
+} from '@/interfaces/user-interface.js'
 
 interface DecodedToken extends jwt.JwtPayload {
-  email: string;
+  email: string
 }
 
 export class UserUseCase {
-  private userRepository;
+  private userRepository
 
   constructor() {
-    this.userRepository = new UserRepositoryPrisma();
+    this.userRepository = new UserRepository()
   }
 
   async create({ name, email, password }: UserCreate) {
-    const userExists = await this.userRepository.findByEmail(email);
+    const userExists = await this.userRepository.findByEmail(email)
 
     if (userExists) {
-      throw new Error("User already exists.");
+      throw new Error('User already exists.')
     }
 
-    password = hashSync(password, 10);
+    password = hashSync(password, 10)
 
-    return await this.userRepository.create({ name, email, password });
+    const user = await this.userRepository.create({ name, email, password })
+
+    const token = this.createToken(user)
+
+    return { userId: user.id, token }
   }
 
   async login({ email, password }: UserLogin) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email)
 
     if (!user) {
-      throw new Error("User not found.");
+      throw new Error('User not found.')
     }
 
-    const isCorrectPassword = compareSync(password, user.password);
+    const isCorrectPassword = compareSync(password, user.password)
 
     if (!isCorrectPassword) {
-      throw new Error("Invalid password.");
+      throw new Error('Invalid password.')
     }
 
     const token = this.createToken(user)
 
-    return { userId: user.id, token };
+    return { userId: user.id, token }
   }
 
-  createToken(user: Pick<User, "id" | "email" | "password">) {
-    const jwtKey = process.env.JWT_KEY;
+  createToken(user: Pick<User, 'id' | 'email' | 'password'>) {
+    const jwtKey = process.env.JWT_KEY
     if (!jwtKey) {
-      throw new Error("JWT key is not defined.");
+      throw new Error('JWT key is not defined.')
     }
 
     const token = jwt.sign(
@@ -65,52 +65,36 @@ export class UserUseCase {
         password: user.password,
       },
       jwtKey,
-      { expiresIn: 60 * 60 * 24 }
-    );
+      { expiresIn: 60 * 60 * 24 },
+    )
 
-    return token;
+    return token
   }
 
   async verifyToken(token: string) {
     try {
-      const jwtKey = process.env.JWT_KEY;
+      const jwtKey = process.env.JWT_KEY
       if (!jwtKey) {
-        throw new Error("JWT key is not defined.");
+        throw new Error('JWT key is not defined.')
       }
 
-      const decodedToken = jwt.verify(token, jwtKey) as DecodedToken;
+      const decodedToken = jwt.verify(token, jwtKey) as DecodedToken
 
-      return await this.userRepository.findByEmail(decodedToken.email);
+      return await this.userRepository.findByEmail(decodedToken.email)
     } catch (error) {
-      console.log(`Error verifying token: ${error}`);
+      console.log(`Error verifying token: ${error}`)
     }
   }
 
   async refreshToken(token: string) {
-    const user = await this.verifyToken(token) as User
+    const user = (await this.verifyToken(token)) as User
 
     const newToken = this.createToken({
       id: user.id,
       email: user.email,
-      password:  user.password,
+      password: user.password,
     })
 
-    return newToken;
-  }
-
-  async findByEmail(email: string) {
-    return await this.userRepository.findByEmail(email);
-  }
-
-  async addStats(userId: string, data: UserStats) {
-    return await this.userRepository.addStats(userId, data)
-  }
-
-  async update(userId: string, data: UserUpdate) {
-    return await this.userRepository.update(userId, data);
-  }
-
-  async delete(userId: string) {
-    await this.userRepository.delete(userId);
+    return newToken
   }
 }

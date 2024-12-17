@@ -1,29 +1,30 @@
 {
-  "name": "const-diet-backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "seed": "tsx --env-file .env prisma/seeds/index.ts",
-    "dev": "tsx watch --env-file .env src/server.ts",
-    "build": "tsup src"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.6",
-    "tsup": "^8.1.0",
-    "tsx": "^4.11.2",
-    "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "@fastify/cors": "^9.0.1",
-    "@prisma/client": "^5.14.0",
-    "bcrypt": "^5.1.1",
-    "fastify": "^4.27.0",
-    "jsonwebtoken": "^9.0.2"
-  }
+	"name": "const-diet-backend",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"seed": "tsx --env-file .env prisma/seeds/index.ts",
+		"dev": "tsx watch --env-file .env src/server.ts",
+		"build": "tsup src"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/bcrypt": "^5.0.2",
+		"@types/jsonwebtoken": "^9.0.6",
+		"tsup": "^8.1.0",
+		"tsx": "^4.11.2",
+		"typescript": "^5.4.5"
+	},
+	"dependencies": {
+		"@fastify/cors": "^9.0.1",
+		"@prisma/client": "^5.14.0",
+		"bcrypt": "^5.1.1",
+		"fastify": "^4.27.0",
+		"jsonwebtoken": "^9.0.2"
+	}
 }
