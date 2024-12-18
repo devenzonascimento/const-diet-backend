@@ -1,43 +1,37 @@
 import { FoodRepository } from '@/repositories/food-repository.js'
-
-import type {
-  FoodCreate,
-  FoodUpdate,
-  IFoodRepository,
-} from '@/interfaces/food-interface.js'
+import type { IFoodRepository } from '@/interfaces/food-repository-interface.js'
+import type { Food } from '@/models/food-types.js'
 
 export class FoodUseCase {
   private foodRepository: IFoodRepository
 
-  constructor() {
-    this.foodRepository = new FoodRepository()
+  constructor(foodRepository: IFoodRepository) {
+    this.foodRepository = foodRepository
   }
 
-  async create(foodData: FoodCreate) {
-    const existsFood = await this.foodRepository.findByName(
-      foodData.userId,
-      foodData.name,
-    )
+  private async existsFoodWithSameName(foodName: string) {
+    const foodWithSameName = await this.foodRepository.findByName(foodName)
 
-    if (existsFood) {
+    return foodWithSameName !== null
+  }
+
+  public async create(food: Food) {
+    const existsFoodName = await this.existsFoodWithSameName(food.name)
+
+    if (existsFoodName) {
       throw new Error('This food name already exists')
     }
 
-    return await this.foodRepository.create(foodData)
+    return await this.foodRepository.create(food)
   }
 
-  async update(userId: number, foodData: FoodUpdate) {
-    const existsFood = await this.foodRepository.findByName(
-      userId,
-      foodData.name,
-    )
+  public async update(food: Food) {
+    const existsFoodName = await this.existsFoodWithSameName(food.name)
 
-    if (existsFood && existsFood.id !== foodData.id) {
+    if (existsFoodName) {
       throw new Error('This food name already exists')
     }
 
-    const updatedFood = await this.foodRepository.update(foodData)
-
-    return updatedFood
+    return await this.foodRepository.update(food)
   }
 }

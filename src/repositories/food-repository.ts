@@ -1,93 +1,172 @@
 import { prisma } from '@/database/prisma-client.js'
 
-import type {
-  IFoodRepository,
-  FoodCreate,
-  FoodUpdate,
-} from '@/interfaces/food-interface.js'
+import type { IFoodRepository } from '@/interfaces/food-repository-interface.js'
+
+import type { Food } from '@/models/food-types.js'
 
 export class FoodRepository implements IFoodRepository {
-  async create(foodData: FoodCreate) {
+  private userId: number
+
+  constructor(userId: number) {
+    this.userId = userId
+  }
+
+  // #region Commands
+  async create(food: Food) {
     return await prisma.food.create({
       data: {
-        userId: foodData.userId,
-        name: foodData.name,
-        unit: foodData.unit,
-        calories: foodData.calories,
-        carbohydrates: foodData.carbohydrates,
-        proteins: foodData.proteins,
-        fats: foodData.fats,
-        sodium: foodData.sodium,
-        fibers: foodData.fibers,
+        name: food.name,
+        unit: food.unit,
+        calories: food.calories,
+        macronutrients: {
+          create: {
+            carbohydrates: food.macronutrients.carbohydrates,
+            proteins: food.macronutrients.proteins,
+            fats: food.macronutrients.fats,
+            sodium: food.macronutrients.sodium,
+            fibers: food.macronutrients.fibers,
+          },
+        },
+        user: {
+          connect: {
+            id: this.userId,
+          },
+        },
       },
       select: {
         id: true,
         name: true,
         unit: true,
         calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        sodium: true,
-        fibers: true,
+        macronutrients: {
+          select: {
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            sodium: true,
+            fibers: true,
+          },
+        },
       },
     })
   }
 
+  async update(food: Food) {
+    return await prisma.food.update({
+      where: {
+        userId: this.userId,
+        id: food.id,
+      },
+      data: {
+        name: food.name,
+        unit: food.unit,
+        calories: food.calories,
+        macronutrients: {
+          create: {
+            carbohydrates: food.macronutrients.carbohydrates,
+            proteins: food.macronutrients.proteins,
+            fats: food.macronutrients.fats,
+            sodium: food.macronutrients.sodium,
+            fibers: food.macronutrients.fibers,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        calories: true,
+        macronutrients: {
+          select: {
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            sodium: true,
+            fibers: true,
+          },
+        },
+      },
+    })
+  }
+
+  async delete(foodId: number) {
+    await prisma.food.delete({
+      where: {
+        id: foodId,
+        userId: this.userId,
+      },
+    })
+  }
+  // #endregion Commands
+
+  // #region Queries
   async findById(foodId: number) {
     return await prisma.food.findFirst({
       where: {
         id: foodId,
+        userId: this.userId,
       },
       select: {
         id: true,
         name: true,
         unit: true,
         calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        sodium: true,
-        fibers: true,
+        macronutrients: {
+          select: {
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            sodium: true,
+            fibers: true,
+          },
+        },
       },
     })
   }
 
-  async findByName(userId: number, foodName: string) {
+  async findByName(foodName: string) {
     return await prisma.food.findFirst({
       where: {
-        userId,
         name: foodName,
+        userId: this.userId,
       },
       select: {
         id: true,
         name: true,
         unit: true,
         calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        sodium: true,
-        fibers: true,
+        macronutrients: {
+          select: {
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            sodium: true,
+            fibers: true,
+          },
+        },
       },
     })
   }
 
-  async getAll(userId: number) {
+  async getAll() {
     return await prisma.food.findMany({
       where: {
-        userId,
+        userId: this.userId,
       },
       select: {
         id: true,
         name: true,
         unit: true,
         calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        sodium: true,
-        fibers: true,
+        macronutrients: {
+          select: {
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            sodium: true,
+            fibers: true,
+          },
+        },
       },
       orderBy: {
         name: 'asc',
@@ -95,10 +174,10 @@ export class FoodRepository implements IFoodRepository {
     })
   }
 
-  async getAllWithPagination(userId: number, page: number, pageSize: number) {
+  async getAllWithPagination(page: number, pageSize: number) {
     const foods = await prisma.food.findMany({
       where: {
-        userId,
+        userId: this.userId,
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -107,11 +186,15 @@ export class FoodRepository implements IFoodRepository {
         name: true,
         unit: true,
         calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        sodium: true,
-        fibers: true,
+        macronutrients: {
+          select: {
+            carbohydrates: true,
+            proteins: true,
+            fats: true,
+            sodium: true,
+            fibers: true,
+          },
+        },
       },
       orderBy: {
         name: 'asc',
@@ -127,41 +210,5 @@ export class FoodRepository implements IFoodRepository {
       currentPage: page,
     }
   }
-
-  async update(foodData: FoodUpdate) {
-    return await prisma.food.update({
-      where: {
-        id: foodData.id,
-      },
-      data: {
-        name: foodData.name,
-        unit: foodData.unit,
-        calories: foodData.calories,
-        carbohydrates: foodData.carbohydrates,
-        proteins: foodData.proteins,
-        fats: foodData.fats,
-        sodium: foodData.sodium,
-        fibers: foodData.fibers,
-      },
-      select: {
-        id: true,
-        name: true,
-        unit: true,
-        calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        sodium: true,
-        fibers: true,
-      },
-    })
-  }
-
-  async delete(foodId: number) {
-    await prisma.food.delete({
-      where: {
-        id: foodId,
-      },
-    })
-  }
+  // #endregion Queries
 }
