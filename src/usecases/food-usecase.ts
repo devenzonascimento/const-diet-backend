@@ -26,9 +26,9 @@ export class FoodUseCase {
   }
 
   public async update(food: Food) {
-    const existsFoodName = await this.existsFoodWithSameName(food.name)
+    const foodWithSameName = await this.foodRepository.findByName(food.name)
 
-    if (existsFoodName) {
+    if (foodWithSameName && foodWithSameName.id !== food.id) {
       throw new Error('This food name already exists')
     }
 
