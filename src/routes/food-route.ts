@@ -55,6 +55,39 @@ export const foodRoutes = async (server: FastifyInstance) => {
       reply.code(500).send(error)
     }
   })
+
+  server.post<{ Params: RequestParams }>(
+    '/:foodId/image-upload',
+    async (req, reply) => {
+      const foodId = Number(req.params.foodId)
+
+      if (!foodId) {
+        reply
+          .status(400)
+          .send({ error: 'O parâmetro (foodId) é obrigáritorio' })
+      }
+
+      const data = await req.file()
+
+      if (!data) {
+        reply.status(400).send({ error: 'Nenhum arquivo enviado' })
+      }
+
+      const foodRepository = new FoodRepository(req.user.id)
+
+      const foodUseCase = new FoodUseCase(foodRepository)
+
+      const result = await foodUseCase.imageUpload(data)
+
+      if (!result.success) {
+        reply.status(500).send({ error: 'Falha ao salvar imagem na memória' })
+      }
+
+      await foodRepository.saveImageUrl(foodId, result.imageUrl)
+
+      reply.code(201).send(result.imageUrl)
+    },
+  )
   // #endregion Commands
 
   // #region Queries
