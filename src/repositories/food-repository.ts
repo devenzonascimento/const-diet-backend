@@ -36,6 +36,7 @@ export class FoodRepository implements IFoodRepository {
       select: {
         id: true,
         name: true,
+        imageUrl: true,
         unit: true,
         calories: true,
         macronutrients: {
@@ -74,6 +75,7 @@ export class FoodRepository implements IFoodRepository {
       select: {
         id: true,
         name: true,
+        imageUrl: true,
         unit: true,
         calories: true,
         macronutrients: {
@@ -97,6 +99,17 @@ export class FoodRepository implements IFoodRepository {
       },
     })
   }
+
+  async saveImageUrl(foodId: number, imageUrl: string) {
+    await prisma.food.update({
+      where: {
+        id: foodId,
+      },
+      data: {
+        imageUrl,
+      },
+    })
+  }
   // #endregion Commands
 
   // #region Queries
@@ -109,6 +122,7 @@ export class FoodRepository implements IFoodRepository {
       select: {
         id: true,
         name: true,
+        imageUrl: true,
         unit: true,
         calories: true,
         macronutrients: {
@@ -133,6 +147,7 @@ export class FoodRepository implements IFoodRepository {
       select: {
         id: true,
         name: true,
+        imageUrl: true,
         unit: true,
         calories: true,
         macronutrients: {
@@ -156,6 +171,7 @@ export class FoodRepository implements IFoodRepository {
       select: {
         id: true,
         name: true,
+        imageUrl: true,
         unit: true,
         calories: true,
         macronutrients: {
@@ -184,6 +200,7 @@ export class FoodRepository implements IFoodRepository {
       select: {
         id: true,
         name: true,
+        imageUrl: true,
         unit: true,
         calories: true,
         macronutrients: {
