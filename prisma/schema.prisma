@@ -9,113 +9,207 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  password      String
+  id Int @id @default(autoincrement())
+
+  // Credentials
+  email    String @unique
+  password String
+
+  // Details
   name          String
   age           Int?
   height        Int?
   weight        Float?
   sex           String?
   activityLevel String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  foods         Food[]
-  meals         Meal[]
-  plans         Plan[]
-  routines      Routine[]
+
+  // Relations
+  foods    Food[]
+  meals    Meal[]
+  plans    Plan[]
+  routines Routine[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Plan {
-  id        Int            @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
+  // Details
   name      String
   goal      String
   startDate DateTime
   endDate   DateTime
-  isActive  Boolean        @default(false)
-  userId    Int
-  routines  DailyRoutine[]
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive  Boolean  @default(false)
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  routines DailyRoutine[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("plans")
 }
 
 model DailyRoutine {
-  id          String   @id @default(uuid())
+  id Int @id @default(autoincrement())
+
+  // Details
   date        DateTime
   status      Status   @default(PENDING)
   mealsStatus Json?
-  planId      Int
-  routineId   Int
-  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
-  routine     Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+
+  // Relations
+  planId Int
+  plan   Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  routineId Int
+  routine   Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("dailyRoutines")
 }
 
 model Routine {
-  id            Int            @id @default(autoincrement())
-  name          String
-  water         Int            @default(0)
-  calories      Float          @default(0)
-  carbohydrates Float          @default(0)
-  proteins      Float          @default(0)
-  fats          Float          @default(0)
-  fibers        Float          @default(0)
-  sodium        Float          @default(0)
-  isDeleted     Boolean        @default(false)
-  userId        Int
-  DailyRoutine  DailyRoutine[]
-  User          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  meals         RoutineMeal[]
+  id Int @id @default(autoincrement())
+
+  // Details
+  name     String
+  water    Int    @default(0)
+  calories Float  @default(0)
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  macronutrientsId Int
+  macronutrients   Macronutrients @relation(fields: [macronutrientsId], references: [id])
+
+  DailyRoutine DailyRoutine[]
+  meals        RoutineMeal[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("routines")
 }
 
 model RoutineMeal {
+  id Int @id @default(autoincrement())
+
+  // Details
+  time String
+
+  // Relations
   routineId Int
-  mealId    Int
-  time      String
-  meal      Meal    @relation(fields: [mealId], references: [id], onDelete: Cascade)
   routine   Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
 
-  @@id([routineId, mealId, time])
+  mealId Int
+  meal   Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("routineMeals")
 }
 
 model Meal {
-  id            Int           @id @default(autoincrement())
-  name          String
-  calories      Float         @default(0)
-  carbohydrates Float         @default(0)
-  proteins      Float         @default(0)
-  fats          Float         @default(0)
-  fibers        Float         @default(0)
-  sodium        Float         @default(0)
-  isDeleted     Boolean       @default(false)
-  userId        Int
-  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  foods         MealFood[]
-  routines      RoutineMeal[]
+  id Int @id @default(autoincrement())
+
+  // Details
+  name     String
+  calories Float  @default(0)
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  macronutrientsId Int
+  macronutrients   Macronutrients @relation(fields: [macronutrientsId], references: [id])
+
+  foods    MealFood[]
+  routines RoutineMeal[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("meals")
 }
 
 model MealFood {
-  mealId   Int
-  foodId   Int
+  // Details
   quantity Float
-  food     Food  @relation(fields: [foodId], references: [id], onDelete: Cascade)
-  meal     Meal  @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  // Relations
+  mealId Int
+  meal   Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  foodId Int
+  food   Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@id([mealId, foodId])
+  @@map("mealFoods")
 }
 
 model Food {
-  id            Int        @id @default(autoincrement())
-  name          String
-  unit          Unit       @default(GRAMS)
-  calories      Float      @default(0)
-  carbohydrates Float      @default(0)
-  proteins      Float      @default(0)
-  fats          Float      @default(0)
-  fibers        Float      @default(0)
-  sodium        Float      @default(0)
-  isDeleted     Boolean    @default(false)
-  userId        Int
-  User          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  meals         MealFood[]
+  id Int @id @default(autoincrement())
+
+  // Details
+  name     String
+  imageUrl String?
+  unit     Unit   @default(GRAMS)
+  calories Float  @default(0)
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  macronutrientsId Int
+  macronutrients   Macronutrients @relation(fields: [macronutrientsId], references: [id])
+
+  meals MealFood[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("foods")
+}
+
+model Macronutrients {
+  id Int @id @default(autoincrement())
+
+  // Details
+  carbohydrates Float @default(0)
+  proteins      Float @default(0)
+  fats          Float @default(0)
+  fibers        Float @default(0)
+  sodium        Float @default(0)
+
+  // Relations
+  foods    Food[]
+  meals    Meal[]
+  routines Routine[]
+
+  @@map("macronutrients")
 }
 
 enum Status {

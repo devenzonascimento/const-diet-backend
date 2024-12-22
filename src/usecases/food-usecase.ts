@@ -1,43 +1,73 @@
-import { FoodRepository } from '@/repositories/food-repository.js'
-
-import type {
-  FoodCreate,
-  FoodUpdate,
-  IFoodRepository,
-} from '@/interfaces/food-interface.js'
+import fs from 'node:fs'
+import path from 'node:path'
+import { __dirname, BASE_URL } from '@/server.js'
+import type { MultipartFile } from '@fastify/multipart'
+import type { IFoodRepository } from '@/interfaces/food-repository-interface.js'
+import type { Food } from '@/models/food-types.js'
 
 export class FoodUseCase {
   private foodRepository: IFoodRepository
 
-  constructor() {
-    this.foodRepository = new FoodRepository()
+  constructor(foodRepository: IFoodRepository) {
+    this.foodRepository = foodRepository
   }
 
-  async create(foodData: FoodCreate) {
-    const existsFood = await this.foodRepository.findByName(
-      foodData.userId,
-      foodData.name,
-    )
+  private async existsFoodWithSameName(foodName: string) {
+    const foodWithSameName = await this.foodRepository.findByName(foodName)
 
-    if (existsFood) {
+    return foodWithSameName !== null
+  }
+
+  public async create(food: Food) {
+    const existsFoodName = await this.existsFoodWithSameName(food.name)
+
+    if (existsFoodName) {
       throw new Error('This food name already exists')
     }
 
-    return await this.foodRepository.create(foodData)
+    return await this.foodRepository.create(food)
   }
 
-  async update(userId: number, foodData: FoodUpdate) {
-    const existsFood = await this.foodRepository.findByName(
-      userId,
-      foodData.name,
-    )
+  public async update(food: Food) {
+    const foodWithSameName = await this.foodRepository.findByName(food.name)
 
-    if (existsFood && existsFood.id !== foodData.id) {
+    if (foodWithSameName && foodWithSameName.id !== food.id) {
       throw new Error('This food name already exists')
     }
 
-    const updatedFood = await this.foodRepository.update(foodData)
+    return await this.foodRepository.update(food)
+  }
 
-    return updatedFood
+  public async imageUpload({
+    filename,
+    mimetype,
+    file,
+  }: MultipartFile): Promise<{ success: boolean; imageUrl: string }> {
+    if (!mimetype.startsWith('image/')) {
+      // return reply
+      //   .status(400)
+      //   .send({ error: 'Apenas arquivos de imagem são permitidos' })
+      throw new Error('Apenas arquivos de imagem são permitidos')
+    }
+
+    const uploadDir = path.join(__dirname, 'uploads')
+
+    const filePath = path.join(uploadDir, filename)
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true })
+    }
+
+    try {
+      const stream = fs.createWriteStream(filePath)
+      await file.pipe(stream)
+
+      const imageUrl = `${BASE_URL}/uploads/${filename}`
+
+      return { success: true, imageUrl: imageUrl }
+    } catch (error) {
+      console.log({ error: error })
+      return { success: false, imageUrl: '' }
+    }
   }
 }
