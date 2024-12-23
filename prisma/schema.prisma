@@ -130,8 +130,10 @@ model Meal {
   id Int @id @default(autoincrement())
 
   // Details
-  name     String
-  calories Float  @default(0)
+  name        String
+  description String?
+  imageUrl    String?
+  calories    Float   @default(0)
 
   // Relations
   userId Int
@@ -175,8 +177,8 @@ model Food {
   // Details
   name     String
   imageUrl String?
-  unit     Unit   @default(GRAMS)
-  calories Float  @default(0)
+  unit     Unit    @default(GRAMS)
+  calories Float   @default(0)
 
   // Relations
   userId Int
