@@ -1,8 +1,23 @@
 import { prisma } from '@/database/prisma-client.js'
-
 import type { IFoodRepository } from '@/interfaces/food-repository-interface.js'
-
 import type { Food } from '@/models/food-types.js'
+
+const QUERY_SELECT = {
+  id: true,
+  name: true,
+  imageUrl: true,
+  unit: true,
+  calories: true,
+  macronutrients: {
+    select: {
+      carbohydrates: true,
+      proteins: true,
+      fats: true,
+      sodium: true,
+      fibers: true,
+    },
+  },
+} as const
 
 export class FoodRepository implements IFoodRepository {
   private userId: number
@@ -11,10 +26,15 @@ export class FoodRepository implements IFoodRepository {
     this.userId = userId
   }
 
-  // #region Commands
+  // #region COMMANDS
   async create(food: Food) {
     return await prisma.food.create({
       data: {
+        user: {
+          connect: {
+            id: this.userId,
+          },
+        },
         name: food.name,
         unit: food.unit,
         calories: food.calories,
@@ -27,28 +47,8 @@ export class FoodRepository implements IFoodRepository {
             fibers: food.macronutrients.fibers,
           },
         },
-        user: {
-          connect: {
-            id: this.userId,
-          },
-        },
       },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        unit: true,
-        calories: true,
-        macronutrients: {
-          select: {
-            carbohydrates: true,
-            proteins: true,
-            fats: true,
-            sodium: true,
-            fibers: true,
-          },
-        },
-      },
+      select: QUERY_SELECT,
     })
   }
 
@@ -72,22 +72,7 @@ export class FoodRepository implements IFoodRepository {
           },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        unit: true,
-        calories: true,
-        macronutrients: {
-          select: {
-            carbohydrates: true,
-            proteins: true,
-            fats: true,
-            sodium: true,
-            fibers: true,
-          },
-        },
-      },
+      select: QUERY_SELECT,
     })
   }
 
@@ -110,31 +95,16 @@ export class FoodRepository implements IFoodRepository {
       },
     })
   }
-  // #endregion Commands
+  // #endregion COMMANDS
 
-  // #region Queries
+  // #region QUERIES
   async findById(foodId: number) {
     return await prisma.food.findFirst({
       where: {
         id: foodId,
         userId: this.userId,
       },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        unit: true,
-        calories: true,
-        macronutrients: {
-          select: {
-            carbohydrates: true,
-            proteins: true,
-            fats: true,
-            sodium: true,
-            fibers: true,
-          },
-        },
-      },
+      select: QUERY_SELECT,
     })
   }
 
@@ -144,22 +114,7 @@ export class FoodRepository implements IFoodRepository {
         name: foodName,
         userId: this.userId,
       },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        unit: true,
-        calories: true,
-        macronutrients: {
-          select: {
-            carbohydrates: true,
-            proteins: true,
-            fats: true,
-            sodium: true,
-            fibers: true,
-          },
-        },
-      },
+      select: QUERY_SELECT,
     })
   }
 
@@ -168,22 +123,7 @@ export class FoodRepository implements IFoodRepository {
       where: {
         userId: this.userId,
       },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        unit: true,
-        calories: true,
-        macronutrients: {
-          select: {
-            carbohydrates: true,
-            proteins: true,
-            fats: true,
-            sodium: true,
-            fibers: true,
-          },
-        },
-      },
+      select: QUERY_SELECT,
       orderBy: {
         name: 'asc',
       },
@@ -197,22 +137,7 @@ export class FoodRepository implements IFoodRepository {
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        unit: true,
-        calories: true,
-        macronutrients: {
-          select: {
-            carbohydrates: true,
-            proteins: true,
-            fats: true,
-            sodium: true,
-            fibers: true,
-          },
-        },
-      },
+      select: QUERY_SELECT,
       orderBy: {
         name: 'asc',
       },
@@ -227,5 +152,5 @@ export class FoodRepository implements IFoodRepository {
       currentPage: page,
     }
   }
-  // #endregion Queries
+  // #endregion QUERIES
 }
