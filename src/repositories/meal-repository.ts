@@ -53,7 +53,7 @@ const QUERY_SELECT = {
   },
 } as const
 
-export class MealRepositoryPrisma implements IMealRepository {
+export class MealRepository implements IMealRepository {
   private userId: number
 
   constructor(userId: number) {
