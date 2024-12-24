@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import { authMiddleware } from '@/middlewares/auth-middleware.js'
 
 import { FoodRepository } from '@/repositories/food-repository.js'
-import { FoodUseCase } from '@/usecases/food-usecase.js'
+import { foodUseCaseFactory } from '@/factories/food-usecase-factory.js'
 import type { Food } from '@/models/food-types.js'
 
 type RequestParams = {
@@ -13,12 +13,10 @@ type RequestParams = {
 export const foodRoutes = async (server: FastifyInstance) => {
   server.addHook('preHandler', authMiddleware)
 
-  // #region Commands
+  // #region COMMANDS
   server.post<{ Body: Food }>('/', async (req, reply) => {
     try {
-      const foodRepository = new FoodRepository(req.user.id)
-
-      const foodUseCase = new FoodUseCase(foodRepository)
+      const foodUseCase = foodUseCaseFactory(req.user.id)
 
       const food = await foodUseCase.create(req.body)
 
@@ -30,9 +28,7 @@ export const foodRoutes = async (server: FastifyInstance) => {
 
   server.put<{ Body: Food }>('/', async (req, reply) => {
     try {
-      const foodRepository = new FoodRepository(req.user.id)
-
-      const foodUseCase = new FoodUseCase(foodRepository)
+      const foodUseCase = foodUseCaseFactory(req.user.id)
 
       const food = await foodUseCase.update(req.body)
 
@@ -73,9 +69,7 @@ export const foodRoutes = async (server: FastifyInstance) => {
         reply.status(400).send({ error: 'Nenhum arquivo enviado' })
       }
 
-      const foodRepository = new FoodRepository(req.user.id)
-
-      const foodUseCase = new FoodUseCase(foodRepository)
+      const foodUseCase = foodUseCaseFactory(req.user.id)
 
       const result = await foodUseCase.imageUpload(data)
 
@@ -83,14 +77,16 @@ export const foodRoutes = async (server: FastifyInstance) => {
         reply.status(500).send({ error: 'Falha ao salvar imagem na memória' })
       }
 
+      const foodRepository = new FoodRepository(req.user.id)
+
       await foodRepository.saveImageUrl(foodId, result.imageUrl)
 
       reply.code(201).send(result.imageUrl)
     },
   )
-  // #endregion Commands
+  // #endregion COMMANDS
 
-  // #region Queries
+  // #region QUERIES
   server.get<{ Params: RequestParams }>('/:foodId', async (req, reply) => {
     try {
       const { foodId } = req.params
@@ -132,5 +128,5 @@ export const foodRoutes = async (server: FastifyInstance) => {
       reply.code(500).send(error)
     }
   })
-  // #endregion Queries
+  // #endregion QUERIES
 }
