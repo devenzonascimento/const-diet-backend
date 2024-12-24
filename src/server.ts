@@ -48,7 +48,7 @@ server.register(foodRoutes, {
 })
 
 server.register(mealRoutes, {
-  prefix: 'users/:userId/meals',
+  prefix: 'meals',
 })
 
 server.register(routineRoutes, {

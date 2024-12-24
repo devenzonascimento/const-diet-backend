@@ -1,94 +1,83 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from 'fastify'
 
-import { authMiddleware } from "../middlewares/auth-middleware.js";
+import { authMiddleware } from '../middlewares/auth-middleware.js'
 
-import { MealUseCase } from "../usecases/meal-usecase.js";
+import { MealRepository } from '@/repositories/meal-repository.js'
+import { mealUseCaseFactory } from '@/factories/meal-usecase-factory.js'
+import type { Meal } from '@/models/meal-types.js'
 
-import { MealFoodCreate } from "../interfaces/meal-food-interface.js";
-
-interface RequestParams {
-  userId: string;
-  mealId: string;
-}
-
-interface RequestBody {
-  name: string;
-  foods: MealFoodCreate[];
+type RequestParams = {
+  mealId: string
 }
 
 export const mealRoutes = async (server: FastifyInstance) => {
-  const mealUseCase = new MealUseCase();
+  server.addHook('preHandler', authMiddleware)
 
-  server.addHook("preHandler", authMiddleware);
-
-  server.post<{ Params: RequestParams; Body: RequestBody }>(
-    "/",
-    async (req, reply) => {
-      try {
-        const { userId } = req.params;
-        
-        const { name, foods } = req.body;
-
-        const meal = await mealUseCase.create({ userId, name }, foods);
-
-        reply.code(201).send(meal);
-      } catch (error) {
-        reply.code(500).send(error);
-      }
-    }
-  );
-  
-  server.get<{ Params: RequestParams }>("/:mealId", async (req, reply) => {
+  // #region COMMANDS
+  server.post<{ Body: Meal }>('/', async (req, reply) => {
     try {
-      const { mealId } = req.params;
+      const mealUseCase = mealUseCaseFactory(req.user.id)
 
-      const meal = await mealUseCase.findById(mealId);
+      const meal = await mealUseCase.create(req.body)
 
-      reply.code(200).send(meal);
+      reply.code(201).send(meal)
     } catch (error) {
-      reply.code(500).send(error);
+      reply.code(500).send(error)
     }
-  });
+  })
 
-  server.put<{ Params: RequestParams; Body: RequestBody }>(
-    "/:mealId",
-    async (req, reply) => {
-      try {
-        const { mealId } = req.params;
-        
-        const { name, foods } = req.body;
-
-        const meal = await mealUseCase.update({ id: mealId, name }, foods);
-
-        reply.code(200).send(meal);
-      } catch (error) {
-        console.log(error);
-        reply.code(500).send(error);
-      }
-    }
-  );
-
-  server.delete<{ Params: RequestParams }>("/:mealId", async (req, reply) => {
+  server.put<{ Body: Meal }>('/:mealId', async (req, reply) => {
     try {
-      const { mealId } = req.params;
+      const mealUseCase = mealUseCaseFactory(req.user.id)
 
-      await mealUseCase.delete(mealId);
+      const meal = await mealUseCase.create(req.body)
 
-      reply.code(204).send();
+      reply.code(200).send(meal)
     } catch (error) {
-      reply.code(500).send(error);
+      reply.code(500).send(error)
     }
-  });
+  })
 
-  server.get<{ Params: RequestParams }>("/", async (req, reply) => {
+  server.delete<{ Params: RequestParams }>('/:mealId', async (req, reply) => {
     try {
-      const { userId } = req.params;
+      const mealId = Number(req.params.mealId)
 
-      const meals = await mealUseCase.getAll(userId);
+      const mealRepository = new MealRepository(req.user.id)
 
-      reply.code(200).send(meals);
+      await mealRepository.delete(mealId)
+
+      reply.code(204).send()
     } catch (error) {
-      reply.code(500).send(error);
+      reply.code(500).send(error)
     }
-  });
-};
+  })
+  // #endregion COMMANDS
+
+  // #region QUERIES
+  server.get<{ Params: RequestParams }>('/:mealId', async (req, reply) => {
+    try {
+      const mealId = Number(req.params.mealId)
+
+      const mealRepository = new MealRepository(req.user.id)
+
+      const meal = mealRepository.findById(mealId)
+
+      reply.code(200).send(meal)
+    } catch (error) {
+      reply.code(500).send(error)
+    }
+  })
+
+  server.get<{ Params: RequestParams }>('/', async (req, reply) => {
+    try {
+      const mealRepository = new MealRepository(req.user.id)
+
+      const meals = mealRepository.getAll()
+
+      reply.code(200).send(meals)
+    } catch (error) {
+      reply.code(500).send(error)
+    }
+  })
+  // #endregion QUERIES
+}
