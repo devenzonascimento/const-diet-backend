@@ -61,14 +61,18 @@ export class MealRepository implements IMealRepository {
   }
 
   private exportMeal(mealData: QueryMealResult) {
+    if (!mealData) {
+      return null
+    }
+
     const meal: Meal = {
-      id: mealData.id,
-      name: mealData.name,
-      description: mealData.description,
-      imageUrl: mealData.imageUrl,
-      calories: mealData.calories,
-      macronutrients: mealData.macronutrients,
-      foods: mealData.foods.map(({ quantity, food }) => {
+      id: mealData?.id,
+      name: mealData?.name,
+      description: mealData?.description,
+      imageUrl: mealData?.imageUrl,
+      calories: mealData?.calories,
+      macronutrients: mealData?.macronutrients,
+      foods: mealData?.foods?.map(({ quantity, food }) => {
         return {
           ...food,
           quantity,

@@ -18,15 +18,24 @@ export class MealUseCase {
   }
 
   private calculateTotalMacronutrients(foods: MealFood[]) {
-    const macronutrients = foods.reduce((acc, m) => {
-      return {
-        carbohydrates: acc.carbohydrates + m.macronutrients.carbohydrates,
-        proteins: acc.proteins + m.macronutrients.proteins,
-        fats: acc.fats + m.macronutrients.fats,
-        sodium: acc.sodium + m.macronutrients.sodium,
-        fibers: acc.fibers + m.macronutrients.fibers,
-      }
-    }, {} as Macronutrients)
+    const macronutrients = foods.reduce(
+      (acc, m) => {
+        return {
+          carbohydrates: acc.carbohydrates + m.macronutrients.carbohydrates,
+          proteins: acc.proteins + m.macronutrients.proteins,
+          fats: acc.fats + m.macronutrients.fats,
+          sodium: acc.sodium + m.macronutrients.sodium,
+          fibers: acc.fibers + m.macronutrients.fibers,
+        }
+      },
+      {
+        carbohydrates: 0,
+        proteins: 0,
+        fats: 0,
+        sodium: 0,
+        fibers: 0,
+      } as Macronutrients,
+    )
 
     return macronutrients
   }
