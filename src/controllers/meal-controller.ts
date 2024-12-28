@@ -1,7 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-
 import { authMiddleware } from '../middlewares/auth-middleware.js'
-
 import { MealRepository } from '@/repositories/meal-repository.js'
 import { mealUseCaseFactory } from '@/factories/meal-usecase-factory.js'
 import type { Meal } from '@/models/meal-types.js'
@@ -10,16 +8,16 @@ type RequestParams = {
   mealId: string
 }
 
-export const mealRoutes = async (server: FastifyInstance) => {
+export const mealController = async (server: FastifyInstance) => {
   server.addHook('preHandler', authMiddleware)
 
   // #region COMMANDS
   server.post<{ Body: Meal }>('/', async (req, reply) => {
     try {
       const mealUseCase = mealUseCaseFactory(req.user.id)
-
+      
       const meal = await mealUseCase.create(req.body)
-
+      
       reply.code(201).send(meal)
     } catch (error) {
       reply.code(500).send(error)

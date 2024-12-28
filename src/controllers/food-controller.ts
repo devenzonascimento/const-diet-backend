@@ -1,7 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-
 import { authMiddleware } from '@/middlewares/auth-middleware.js'
-
 import { FoodRepository } from '@/repositories/food-repository.js'
 import { foodUseCaseFactory } from '@/factories/food-usecase-factory.js'
 import type { Food } from '@/models/food-types.js'

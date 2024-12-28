@@ -2,12 +2,13 @@ import type { FastifyInstance } from 'fastify'
 import { authRoutes } from '@/routes/auth-route.js'
 import { userRoutes } from '@/routes/user-route.js'
 // import { foodRoutes } from '@/routes/food-route.js'
-import { mealRoutes } from '@/routes/meal-route.js'
+// import { mealRoutes } from '@/controllers/meal-controller.js'
 import { routineRoutes } from '@/routes/routine-route.js'
 import { planRoutes } from '@/routes/plan-route.js'
 import { dailyRoutineRoutes } from '@/routes/daily-routine-route.js'
 
 import { foodController } from './controllers/food-controller.js'
+import { mealController } from '@/controllers/meal-controller.js'
 
 export const apiRoutes = async (server: FastifyInstance) => {
   server.get('/', () => {
@@ -24,9 +25,7 @@ export const apiRoutes = async (server: FastifyInstance) => {
 
   server.register(foodController, { prefix: '/foods' })
 
-  server.register(mealRoutes, {
-    prefix: 'meals',
-  })
+  server.register(mealController, { prefix: '/meals' })
 
   server.register(routineRoutes, {
     prefix: 'users/:userId/routines',
