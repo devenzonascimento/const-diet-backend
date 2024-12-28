@@ -2,26 +2,44 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { fastify } from 'fastify'
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod'
 import { fastifyCors } from '@fastify/cors'
-import { fastifyMultipart } from '@fastify/multipart'
 import { fastifyStatic } from '@fastify/static'
+import { fastifyMultipart } from '@fastify/multipart'
+import { fastifySwagger } from '@fastify/swagger'
+import { fastifySwaggerUi } from '@fastify/swagger-ui'
 
-import { authRoutes } from '@/routes/auth-route.js'
-import { userRoutes } from '@/routes/user-route.js'
-import { foodRoutes } from '@/routes/food-route.js'
-import { mealRoutes } from '@/routes/meal-route.js'
-import { routineRoutes } from '@/routes/routine-route.js'
-import { planRoutes } from '@/routes/plan-route.js'
-import { dailyRoutineRoutes } from '@/routes/daily-routine-route.js'
+import { apiRoutes } from './routes.js'
 
 // Define __dirname para módulos ESM
 export const __dirname = dirname(fileURLToPath(import.meta.url))
 export const BASE_URL = 'http://192.168.0.109:3333'
 
-export const server = fastify()
+export const server = fastify().withTypeProvider<ZodTypeProvider>()
 
-server.register(fastifyCors, {
-  origin: true,
+server.setValidatorCompiler(validatorCompiler)
+server.setSerializerCompiler(serializerCompiler)
+
+server.register(fastifyCors, { origin: '*' })
+
+
+server.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'CONST DIET API',
+      version: '1.0.0',
+    },
+  },
+  transform: jsonSchemaTransform,
+})
+
+server.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
 })
 
 server.register(fastifyMultipart)
@@ -31,42 +49,14 @@ server.register(fastifyStatic, {
   prefix: '/uploads/', // Prefixo da URL para acessar os arquivos
 })
 
-server.get('/', () => {
-  return 'SERVER ON!'
-})
-
-server.register(authRoutes, {
-  prefix: '/auth',
-})
-
-server.register(userRoutes, {
-  prefix: '/',
-})
-
-server.register(foodRoutes, {
-  prefix: '/foods',
-})
-
-server.register(mealRoutes, {
-  prefix: 'meals',
-})
-
-server.register(routineRoutes, {
-  prefix: 'users/:userId/routines',
-})
-
-server.register(planRoutes, {
-  prefix: 'users/:userId/plans',
-})
-
-server.register(dailyRoutineRoutes, {
-  prefix: 'users/:userId/daily-routines',
-})
+server.register(apiRoutes)
 
 const start = async () => {
   try {
     await server.listen({ port: 3333, host: '0.0.0.0' })
+    
     console.log(`🔥 Server is running on ${BASE_URL} 🔥`)
+    console.log(`📘 See the document on ${BASE_URL}/docs 📘`)
   } catch (err) {
     console.log(err)
     server.log.error(err)
