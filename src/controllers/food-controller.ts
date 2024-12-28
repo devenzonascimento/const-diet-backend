@@ -10,7 +10,7 @@ type RequestParams = {
   foodId: string
 }
 
-export const foodRoutes = async (server: FastifyInstance) => {
+export const foodController = async (server: FastifyInstance) => {
   server.addHook('preHandler', authMiddleware)
 
   // #region COMMANDS
