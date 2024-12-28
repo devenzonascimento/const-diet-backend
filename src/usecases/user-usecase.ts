@@ -2,17 +2,18 @@ import jwt from 'jsonwebtoken'
 import { compareSync, hashSync } from 'bcrypt'
 import { UserRepository } from '@/repositories/user-repository.js'
 import type {
+  IUserRepository,
   UserCreate,
   UserLogin,
-  User,
 } from '@/interfaces/user-interface.js'
+import type { User } from '@/models/user-types.js'
 
 interface DecodedToken extends jwt.JwtPayload {
   email: string
 }
 
 export class UserUseCase {
-  private userRepository
+  private userRepository: IUserRepository
 
   constructor() {
     this.userRepository = new UserRepository()
@@ -52,7 +53,7 @@ export class UserUseCase {
     return { userId: user.id, token }
   }
 
-  createToken(user: Pick<User, 'id' | 'email' | 'password'>) {
+  createToken(user: Omit<User, 'name'>) {
     const jwtKey = process.env.JWT_KEY
     if (!jwtKey) {
       throw new Error('JWT key is not defined.')

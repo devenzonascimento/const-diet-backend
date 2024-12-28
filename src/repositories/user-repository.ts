@@ -7,6 +7,24 @@ import type {
   UserStats,
 } from '@/interfaces/user-interface.js'
 
+const QUERY_USER_CREDENTIALS = {
+  id: true,
+  name: true,
+  email: true,
+  password: true,
+} as const
+
+const QUERY_USER_SUMMARY = {
+  id: true,
+  name: true,
+  email: true,
+  age: true,
+  height: true,
+  weight: true,
+  sex: true,
+  activityLevel: true,
+} as const
+
 export class UserRepository implements IUserRepository {
   async create(data: UserCreate) {
     return await prisma.user.create({
@@ -15,6 +33,7 @@ export class UserRepository implements IUserRepository {
         email: data.email,
         password: data.password,
       },
+      select: QUERY_USER_CREDENTIALS,
     })
   }
 
@@ -30,6 +49,16 @@ export class UserRepository implements IUserRepository {
         sex: data.sex,
         activityLevel: data.activityLevel,
       },
+      select: QUERY_USER_SUMMARY,
+    })
+  }
+
+  async findById(userId: number) {
+    return await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: QUERY_USER_CREDENTIALS,
     })
   }
 
@@ -38,6 +67,7 @@ export class UserRepository implements IUserRepository {
       where: {
         email: email,
       },
+      select: QUERY_USER_CREDENTIALS,
     })
   }
 
@@ -56,6 +86,7 @@ export class UserRepository implements IUserRepository {
         sex: data.sex,
         activityLevel: data.activityLevel,
       },
+      select: QUERY_USER_CREDENTIALS,
     })
   }
 
