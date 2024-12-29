@@ -12,7 +12,7 @@ export const authMiddleware = async (
       throw new Error('Authorization header is required')
     }
 
-    const token = req.headers.authorization.split(' ')[1]
+    const token = req.headers.authorization?.replace(/^Bearer /, '') as string
     if (!token) {
       throw new Error('Token is required')
     }

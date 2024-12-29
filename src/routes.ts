@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyTypedInstance } from '@/types/fastify-typed-instance.js'
 import { authRoutes } from '@/routes/auth-route.js'
 import { userRoutes } from '@/routes/user-route.js'
 // import { foodRoutes } from '@/routes/food-route.js'
@@ -10,7 +10,7 @@ import { dailyRoutineRoutes } from '@/routes/daily-routine-route.js'
 import { foodController } from './controllers/food-controller.js'
 import { mealController } from '@/controllers/meal-controller.js'
 
-export const apiRoutes = async (server: FastifyInstance) => {
+export const apiRoutes = async (server: FastifyTypedInstance) => {
   server.get('/', () => {
     return 'SERVER ON!'
   })
