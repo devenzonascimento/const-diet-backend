@@ -18,7 +18,7 @@ export type Food = {
 export const foodSchema = z.object({
   id: z.number(),
   name: z.string(),
-  imageUrl: z.string().optional(),
+  imageUrl: z.string().optional().nullable(),
   unit: z.enum(['GRAMS', 'MILILITERS']),
   calories: z.number().nonnegative(),
   macronutrients: macronutrientsSchema,

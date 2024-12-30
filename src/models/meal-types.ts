@@ -22,8 +22,8 @@ export const mealFoodSchema = foodSchema.extend({ quantity: z.number() })
 export const mealSchema = z.object({
   id: z.number(),
   name: z.string(),
-  description: z.string().optional(),
-  imageUrl: z.string().optional(),
+  description: z.string().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
   calories: z.number().nonnegative(),
   macronutrients: macronutrientsSchema,
   foods: z.array(mealFoodSchema),
