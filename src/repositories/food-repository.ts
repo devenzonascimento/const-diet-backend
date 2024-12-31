@@ -146,7 +146,7 @@ export class FoodRepository implements IFoodRepository {
     const totalCount = await prisma.food.count()
 
     return {
-      itens: foods,
+      items: foods,
       totalCount,
       totalPages: Math.ceil(totalCount / pageSize),
       currentPage: page,

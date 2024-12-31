@@ -172,7 +172,7 @@ export const foodController = async (server: FastifyTypedInstance) => {
         response: {
           200: z
             .object({
-              itens: z.array(foodSchema),
+              items: z.array(foodSchema),
               totalCount: z.number(),
               totalPages: z.number(),
               currentPage: z.number(),

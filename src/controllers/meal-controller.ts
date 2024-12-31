@@ -122,14 +122,36 @@ export const mealController = async (server: FastifyTypedInstance) => {
     {
       schema: {
         tags: ['Meals'],
+        querystring: z.object({
+          page: z.coerce.number(),
+          pageSize: z.coerce.number(),
+        }),
         response: {
-          200: z.array(mealSchema),
+          200: z
+            .object({
+              items: z.array(mealSchema),
+              totalCount: z.number(),
+              totalPages: z.number(),
+              currentPage: z.number(),
+            })
+            .or(z.array(mealSchema)),
         },
       },
     },
     async (req, reply) => {
       try {
         const mealRepository = new MealRepository(req.user.id)
+
+        const { page, pageSize } = req.query
+
+        if (page && pageSize) {
+          const result = await mealRepository.getAllWithPagination(
+            page,
+            pageSize,
+          )
+
+          reply.code(200).send(result)
+        }
 
         const meals = await mealRepository.getAll()
 
