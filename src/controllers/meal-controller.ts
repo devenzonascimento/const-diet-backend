@@ -2,7 +2,7 @@ import type { FastifyTypedInstance } from '@/types/fastify-typed-instance.js'
 import { authMiddleware } from '../middlewares/auth-middleware.js'
 import { MealRepository } from '@/repositories/meal-repository.js'
 import { mealUseCaseFactory } from '@/factories/meal-usecase-factory.js'
-import { mealSchema, type Meal } from '@/models/meal-types.js'
+import { mealFoodSchema, mealSchema, type Meal } from '@/models/meal-types.js'
 import { z } from 'zod'
 
 export const mealController = async (server: FastifyTypedInstance) => {
@@ -14,7 +14,12 @@ export const mealController = async (server: FastifyTypedInstance) => {
     {
       schema: {
         tags: ['Meals'],
-        body: mealSchema,
+        body: z.object({
+          id: z.number(),
+          name: z.string(),
+          description: z.string().optional().nullable(),
+          foods: z.array(mealFoodSchema),
+        }),
         response: {
           201: mealSchema,
         },
@@ -38,7 +43,12 @@ export const mealController = async (server: FastifyTypedInstance) => {
     {
       schema: {
         tags: ['Meals'],
-        body: mealSchema,
+        body: z.object({
+          id: z.number(),
+          name: z.string(),
+          description: z.string().optional().nullable(),
+          foods: z.array(mealFoodSchema),
+        }),
         response: {
           200: mealSchema,
         },
