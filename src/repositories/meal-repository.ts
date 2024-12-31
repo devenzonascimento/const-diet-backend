@@ -1,151 +1,277 @@
-import { prisma } from "../database/prisma-client.js";
-import { MealFoodCreate, MealFoodUpdate } from "../interfaces/meal-food-interface.js";
+import { prisma } from '../database/prisma-client.js'
+import type {
+  IMealRepository,
+  CommandCreateMeal,
+  CommandUpdateMeal,
+} from '@/interfaces/meal-repository-interface.js'
+import type { Meal } from '@/models/meal-types.js'
+import type { Food } from '@/models/food-types.js'
 
-import {
-  MealRepository,
-  MealCreate,
-  MealUpdate,
-  CalculatedFields,
-} from "../interfaces/meal-interface.js";
+type QueryMealResult = Omit<Meal, 'foods'> & {
+  foods: {
+    quantity: number
+    food: Food
+  }[]
+}
 
-export class MealRepositoryPrisma implements MealRepository {
-  async create(mealData: MealCreate, foodsData: MealFoodCreate[]) {
-    return await prisma.meal.create({
-      data: {
-        userId: mealData.userId,
-        name: mealData.name,
-        foods: {
-          createMany: {
-            data: foodsData.map((food) => ({
-              foodId: food.foodId,
-              quantity: food.quantity,            
-            })),
-          },
-        },
-      },
-    });
-  }
-
-  async findById(mealId: string) {
-    return await prisma.meal.findUnique({
-      where: {
-        id: mealId,
-      },
-      select: {
-        id: true,
-        name: true,
-        calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        fibers: true,
-        sodium: true,
-        foods: {
-          select: {
-            food: true,
-            quantity: true,
-          },
-        },
-      },
-    });
-  }
-
-  async getAll(userId: string) {
-    return await prisma.meal.findMany({
-      where: {
-        userId,
-      },
-      select: {
-        id: true,
-        name: true,
-        calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        fibers: true,
-        sodium: true,
-        foods: {
-          select: {
-            food: true,
-            quantity: true,
-          },
-        },
-      },
-    });
-  }
-
-  async update(mealData: MealUpdate, foodsData: MealFoodUpdate) {
-    return await prisma.meal.update({
-      where: {
-        id: mealData.id,
-      },
-      data: {
-        name: mealData.name,
-        foods: {
-          createMany: {
-            data: foodsData.foodsToCreate.map((food) => ({
-              foodId: food.foodId,
-              quantity: food.quantity,            
-            })),
-          },
-          updateMany: foodsData.foodsToUpdate.map((food) => ({
-            where: {
-              foodId: food.foodId
+const QUERY_SELECT = {
+  id: true,
+  name: true,
+  description: true,
+  imageUrl: true,
+  calories: true,
+  macronutrients: {
+    select: {
+      carbohydrates: true,
+      proteins: true,
+      fats: true,
+      sodium: true,
+      fibers: true,
+    },
+  },
+  foods: {
+    select: {
+      quantity: true,
+      food: {
+        select: {
+          id: true,
+          name: true,
+          unit: true,
+          calories: true,
+          macronutrients: {
+            select: {
+              carbohydrates: true,
+              proteins: true,
+              fats: true,
+              sodium: true,
+              fibers: true,
             },
-            data: {
-              quantity: food.quantity,
-            },
-          })),
-          deleteMany: foodsData.foodsToDelete.map((food) => ({
-            foodId: food.foodId,
-          })),
+          },
+        },
+      },
+    },
+  },
+} as const
+
+export class MealRepository implements IMealRepository {
+  private userId: number
+
+  constructor(userId: number) {
+    this.userId = userId
+  }
+
+  private exportMeal(mealData: QueryMealResult) {
+    if (!mealData) {
+      return null
+    }
+
+    const meal: Meal = {
+      id: mealData?.id,
+      name: mealData?.name,
+      description: mealData?.description,
+      imageUrl: mealData?.imageUrl,
+      calories: mealData?.calories,
+      macronutrients: mealData?.macronutrients,
+      foods: mealData?.foods?.map(({ quantity, food }) => {
+        return {
+          ...food,
+          quantity,
         }
-      },
-    });
+      }),
+    }
+
+    return meal
   }
 
-  async delete(mealId: string) {    
+  // #region COMMANDS
+  async create(mealData: CommandCreateMeal) {
+    const result = await prisma.meal.create({
+      data: {
+        user: {
+          connect: {
+            id: this.userId,
+          },
+        },
+        name: mealData.name,
+        description: mealData.description,
+        calories: mealData.calories,
+        macronutrients: {
+          create: {
+            carbohydrates: mealData.macronutrients.carbohydrates,
+            proteins: mealData.macronutrients.proteins,
+            fats: mealData.macronutrients.fats,
+            sodium: mealData.macronutrients.sodium,
+            fibers: mealData.macronutrients.fibers,
+          },
+        },
+        foods: {
+          createMany: {
+            data: mealData.foods.map(food => ({
+              foodId: food.id,
+              quantity: food.quantity,
+            })),
+          },
+        },
+      },
+      select: QUERY_SELECT,
+    })
+
+    return this.exportMeal(result)
+  }
+
+  async update(mealData: CommandUpdateMeal) {
+    const currentFoodIds = await this.getAllFoodIdsByMealId(mealData.id)
+
+    const foodsToCreate = mealData.foods.filter(
+      food => !currentFoodIds.includes(food.id),
+    )
+    const foodsToUpdate = mealData.foods.filter(food =>
+      currentFoodIds.includes(food.id),
+    )
+
     await prisma.$transaction([
       prisma.mealFood.deleteMany({
         where: {
-          mealId,
+          mealId: mealData.id,
+          foodId: {
+            notIn: mealData.foods.map(food => food.id),
+          },
         },
       }),
-      prisma.routineMeal.deleteMany({
+
+      prisma.meal.update({
         where: {
-          mealId,
+          userId: this.userId,
+          id: mealData.id,
+        },
+        data: {
+          name: mealData.name,
+          description: mealData.description,
+          calories: mealData.calories,
+          macronutrients: {
+            update: {
+              carbohydrates: mealData.macronutrients.carbohydrates,
+              proteins: mealData.macronutrients.proteins,
+              fats: mealData.macronutrients.fats,
+              sodium: mealData.macronutrients.sodium,
+              fibers: mealData.macronutrients.fibers,
+            },
+          },
+          foods: {
+            createMany: {
+              data: foodsToCreate.map(food => ({
+                foodId: food.id,
+                quantity: food.quantity,
+              })),
+            },
+            updateMany: foodsToUpdate.map(food => ({
+              where: {
+                foodId: food.id,
+              },
+              data: {
+                quantity: food.quantity,
+              },
+            })),
+          },
         },
       }),
-      prisma.meal.delete({
-        where: {
-          id: mealId,
-        },
-      }),
-    ]);
+    ])
+
+    return await this.findById(mealData.id)
   }
 
-  async saveCalculatedFields(mealId: string, calculatedFields: CalculatedFields) {
-    return await prisma.meal.update({
+  async delete(mealId: number) {
+    await prisma.meal.delete({
+      where: {
+        userId: this.userId,
+        id: mealId,
+      },
+    })
+  }
+
+  async saveImageUrl(mealId: number, imageUrl: string) {
+    await prisma.meal.update({
       where: {
         id: mealId,
       },
-      data: calculatedFields,
-      select: {
-        id: true,
-        name: true,        
-        calories: true,
-        carbohydrates: true,
-        proteins: true,
-        fats: true,
-        fibers: true,
-        sodium: true,
-        foods: {
-          select: {
-            food: true,
-            quantity: true,
-          },
-        },
-      }
-    });
+      data: {
+        imageUrl,
+      },
+    })
   }
+  // #endregion COMMANDS
+
+  // #region QUERIES
+  private async getAllFoodIdsByMealId(mealId: number) {
+    const result = await prisma.mealFood.findMany({
+      where: {
+        mealId,
+      },
+      select: {
+        foodId: true,
+      },
+    })
+
+    return result.map(({ foodId }) => foodId)
+  }
+
+  async findById(mealId: number) {
+    const result = await prisma.meal.findUnique({
+      where: {
+        id: mealId,
+      },
+      select: QUERY_SELECT,
+    })
+
+    return this.exportMeal(result)
+  }
+
+  async findByName(mealName: string) {
+    const result = await prisma.meal.findFirst({
+      where: {
+        userId: this.userId,
+        name: mealName,
+      },
+      select: QUERY_SELECT,
+    })
+
+    return this.exportMeal(result)
+  }
+
+  async getAll() {
+    const result = await prisma.meal.findMany({
+      where: {
+        userId: this.userId,
+      },
+      select: QUERY_SELECT,
+    })
+
+    return result.map(r => this.exportMeal(r))
+  }
+
+  async getAllWithPagination(page: number, pageSize: number) {
+    const result = await prisma.meal.findMany({
+      where: {
+        userId: this.userId,
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: QUERY_SELECT,
+      orderBy: {
+        name: 'asc',
+      },
+    })
+
+    const meals = result.map(r => this.exportMeal(r))
+
+    const totalCount = await prisma.food.count()
+
+    return {
+      items: meals,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
+    }
+  }
+  //#endregion QUERIES
 }

@@ -1,104 +1,89 @@
-import { MealRepositoryPrisma } from "../repositories/meal-repository.js";
-import { MealFoodRepositoryPrisma } from "../repositories/meal-food-repository.js";
-import { RoutineMealRepositoryPrisma } from "../repositories/routine-meal-repository.js";
-
-import { calculateFieldsBasedOnFoods } from "../functions/calculate-fields-based-on-foods.js";
-import { RoutineUseCase } from "./routine-usecase.js";
-
-import { MealCreate, MealUpdate } from "../interfaces/meal-interface.js";
-import { MealFoodCreate } from "../interfaces/meal-food-interface.js";
+import type { IMealRepository } from '@/interfaces/meal-repository-interface.js'
+import type { Meal, MealFood } from '@/models/meal-types.js'
+import type { Macronutrients } from '@/models/macronutrients-types.js'
 
 export class MealUseCase {
-  private mealRepository;
-  private mealFoodRepository;
-  private routineMealRepository;
-  private routineUseCase;
+  private mealRepository: IMealRepository
 
-  constructor() {
-    this.mealRepository = new MealRepositoryPrisma();
-    this.mealFoodRepository = new MealFoodRepositoryPrisma();
-    this.routineMealRepository = new RoutineMealRepositoryPrisma();
-    this.routineUseCase = new RoutineUseCase();
+  constructor(mealRepository: IMealRepository) {
+    this.mealRepository = mealRepository
   }
 
-  async create(mealData: MealCreate, foodsData: MealFoodCreate[]) {
-    const { id } = await this.mealRepository.create(mealData, foodsData);
+  private calculateTotalCalories(foods: MealFood[]) {
+    const calories = foods.reduce((acc, food) => {
+      return acc + food.calories
+    }, 0)
 
-    const meal = await this.saveCalculatedFields(id);
-
-    return meal;
+    return calories
   }
 
-  async findById(mealId: string) {
-    return await this.mealRepository.findById(mealId);
+  private calculateTotalMacronutrients(foods: MealFood[]) {
+    const macronutrients = foods.reduce(
+      (acc, m) => {
+        return {
+          carbohydrates: acc.carbohydrates + m.macronutrients.carbohydrates,
+          proteins: acc.proteins + m.macronutrients.proteins,
+          fats: acc.fats + m.macronutrients.fats,
+          sodium: acc.sodium + m.macronutrients.sodium,
+          fibers: acc.fibers + m.macronutrients.fibers,
+        }
+      },
+      {
+        carbohydrates: 0,
+        proteins: 0,
+        fats: 0,
+        sodium: 0,
+        fibers: 0,
+      } as Macronutrients,
+    )
+
+    return macronutrients
   }
 
-  async getAll(userId: string) {
-    return await this.mealRepository.getAll(userId);
+  private processMealData(meal: Meal) {
+    const calories = this.calculateTotalCalories(meal.foods)
+
+    const macronutrients = this.calculateTotalMacronutrients(meal.foods)
+
+    const foods = meal.foods.map(f => ({ id: f.id, quantity: f.quantity }))
+
+    return {
+      id: meal.id,
+      name: meal.name,
+      description: meal.description,
+      calories: calories,
+      macronutrients: macronutrients,
+      foods: foods,
+    }
   }
 
-  async update(mealData: MealUpdate, foodsData: MealFoodCreate[]) {
-    const currentFoods = await this.mealFoodRepository.findMany(mealData.id);
+  private async existsMealWithSameName(mealName: string) {
+    const mealWithSameName = await this.mealRepository.findByName(mealName)
 
-    const currentFoodIds = currentFoods.map((food) => food.foodId);
-    const newFoodIds = foodsData.map((food) => food.foodId);
-
-    const foodsToCreate = foodsData.filter((food) => {
-      return !currentFoodIds.includes(food.foodId);
-    });
-
-    const foodsToUpdate = foodsData.filter((food) => {
-      return currentFoodIds.includes(food.foodId);
-    });
-
-    const foodsToDelete = currentFoods.filter((food) => {
-      return !newFoodIds.includes(food.foodId);
-    });
-
-    await this.mealRepository.update(mealData, {
-      foodsToCreate,
-      foodsToUpdate,
-      foodsToDelete,
-    });
-
-    const meal = await this.saveCalculatedFields(mealData.id);
-
-    const routinesIdsToRecalculate =
-      await this.routineMealRepository.getRoutineIdsRelatedToMeal(mealData.id);
-
-    this.recalculateFieldsOnFoodUpdate(routinesIdsToRecalculate);
-
-    return meal;
+    return mealWithSameName !== null
   }
 
-  async delete(mealId: string) {
-    const routinesIdsToRecalculate =
-      await this.routineMealRepository.getRoutineIdsRelatedToMeal(mealId);
+  async create(meal: Meal) {
+    const existsMealName = await this.existsMealWithSameName(meal.name)
 
-    await this.mealRepository.delete(mealId);
+    if (existsMealName) {
+      throw new Error('This meal name already exists')
+    }
 
-    this.recalculateFieldsOnFoodUpdate(routinesIdsToRecalculate);
+    const processedMealData = this.processMealData(meal)
+
+    return await this.mealRepository.create(processedMealData)
   }
 
-  async saveCalculatedFields(mealId: string) {
-    const foodsToCalculate = await this.mealFoodRepository.getAllFoodsByMealId(
-      mealId
-    );
+  async update(meal: Meal) {
+    const mealWithSameName = await this.mealRepository.findByName(meal.name)
 
-    const calculatedFields = calculateFieldsBasedOnFoods(foodsToCalculate);
+    if (mealWithSameName && mealWithSameName.id !== meal.id) {
+      throw new Error('This meal name already exists')
+    }
 
-    return await this.mealRepository.saveCalculatedFields(
-      mealId,
-      calculatedFields
-    );
-  }
+    const processedMealData = this.processMealData(meal)
 
-  async recalculateFieldsOnFoodUpdate(
-    routinesIdsToRecalculate: { routineId: string }[]
-  ) {
-    routinesIdsToRecalculate.forEach(
-      async ({ routineId }) =>
-        await this.routineUseCase.saveCalculatedFields(routineId)
-    );
+    return await this.mealRepository.update(processedMealData)
   }
 }

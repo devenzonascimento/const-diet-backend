@@ -1,25 +1,30 @@
 import { z } from 'zod'
+import { foodSchema, type Food } from './food-types.js'
 import {
   macronutrientsSchema,
   type Macronutrients,
 } from './macronutrients-types.js'
 
-export type UnitType = 'GRAMS' | 'MILILITERS'
+export type MealFood = Food & { quantity: number }
 
-export type Food = {
+export type Meal = {
   id: number
   name: string
+  description?: string
   imageUrl?: string
-  unit: UnitType
   calories: number
   macronutrients: Macronutrients
+  foods: MealFood[]
 }
 
-export const foodSchema = z.object({
+export const mealFoodSchema = foodSchema.extend({ quantity: z.number() })
+
+export const mealSchema = z.object({
   id: z.number(),
   name: z.string(),
+  description: z.string().optional().nullable(),
   imageUrl: z.string().optional().nullable(),
-  unit: z.enum(['GRAMS', 'MILILITERS']),
   calories: z.number().nonnegative(),
   macronutrients: macronutrientsSchema,
+  foods: z.array(mealFoodSchema),
 })

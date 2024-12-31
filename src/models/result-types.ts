@@ -1,5 +1,5 @@
 export type PaginationResponse<T> = {
-  itens: T[]
+  items: T[]
   totalCount: number
   totalPages: number
   currentPage: number
