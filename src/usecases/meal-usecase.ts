@@ -78,7 +78,7 @@ export class MealUseCase {
   async update(meal: Meal) {
     const mealWithSameName = await this.mealRepository.findByName(meal.name)
 
-    if (mealWithSameName && mealWithSameName.id !== meal.id) {
+    if (mealWithSameName && mealWithSameName?.id !== meal.id) {
       throw new Error('This meal name already exists')
     }
 

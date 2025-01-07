@@ -39,7 +39,7 @@ export const mealController = async (server: FastifyTypedInstance) => {
   )
 
   server.put(
-    '/:mealId',
+    '/',
     {
       schema: {
         tags: ['Meals'],
@@ -58,7 +58,7 @@ export const mealController = async (server: FastifyTypedInstance) => {
       try {
         const mealUseCase = mealUseCaseFactory(req.user.id)
 
-        const meal = await mealUseCase.create(req.body as Meal)
+        const meal = await mealUseCase.update(req.body as Meal)
 
         reply.code(200).send(meal)
       } catch (error) {
